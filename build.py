@@ -14,12 +14,6 @@ cpp_compiler = "g++"
 
 cpp_include_dirs = [
     "-Ivendor/include/",
-    "-Ivendor/include/glad/",
-    "-Ivendor/include/glfw/",
-    "-Ivendor/include/glm/",
-    "-Ivendor/include/imago2/",
-    "-Ivendor/include/imgui/",
-    "-Ivendor/include/KHR/",
     "-Isrc/g_engine/include/",
 ]
 
@@ -32,6 +26,8 @@ if sys.platform == "win32":
 else:
     cpp_lib_dirs = "-Lvendor/linux_x86_64/"
     cpp_libs.extend(["-lGL", "-ldl"])
+
+cpp_flags = []
 
 # ------------------------------- #
 
@@ -62,13 +58,14 @@ def genObj(compiler, cpp_file_path, store_dir):
     return obj_file_path
 
 
-def genBin(compiler, obj_files, bin_path, include_dirs, lib_dirs, libs):
+def genBin(compiler, obj_files, bin_path, include_dirs, lib_dirs, libs, flags):
     run_command = [compiler]
     run_command.extend(obj_files)
     run_command.extend(["-o", bin_path])
     run_command.extend(include_dirs)
     run_command.extend([lib_dirs])
     run_command.extend(libs)
+    run_command.extend(flags)
 
     print(run_command)
 
@@ -93,4 +90,4 @@ if os.path.basename(__file__) == "build.py":
     print("\nCompiling:")
 
     genBin(cpp_compiler, obj_files, "build/bin/ImageLab",
-           cpp_include_dirs, cpp_lib_dirs, cpp_libs)
+           cpp_include_dirs, cpp_lib_dirs, cpp_libs, cpp_flags)

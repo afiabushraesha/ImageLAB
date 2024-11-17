@@ -952,7 +952,7 @@ static void ShowDemoWindowWidgets(ImGuiDemoWindowData* demo_data)
             IMGUI_DEMO_MARKER("Widgets/Basic/ListBox");
             const char* items[] = { "Apple", "Banana", "Cherry", "Kiwi", "Mango", "Orange", "Pineapple", "Strawberry", "Watermelon" };
             static int item_current = 1;
-            ImGui::ListBox("listbox", &item_current, items, IM_ARRAYSIZE(items), 4);
+            ImGui::ListBox("listbox", &item_current, items, IM_ARRAYSIZE(items), 8);
             ImGui::SameLine(); HelpMarker(
                 "Using the simplified one-liner ListBox API here.\n"
                 "Refer to the \"List boxes\" section below for an explanation of how to use the more flexible and general BeginListBox/EndListBox API.");
