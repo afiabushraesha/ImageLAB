@@ -1,13 +1,12 @@
-#include "g_engine/include/window.hpp"
+#include "include/state.hpp"
 
 int main() {
-    g_engine::Window window;
-    window.init((g_engine::vec2<int>){640, 360}, "ImageLab");
+    app::State state;
+    state.init({640, 360}, "ImageLAB", {0.1f, 0.1f, 0.1f, 1.0f});
 
-    while (window.isOpen()) {
-        window.beginFrame((g_engine::vec4<float>){0.1f, 0.1f, 0.1f, 1.0f});
-        window.endFrame();
+    while (state.window.isOpen()) {
+        state.run();
     }
 
-    window.deinit();
+    state.deinit();
 }
