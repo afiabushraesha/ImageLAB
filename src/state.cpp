@@ -17,7 +17,7 @@ void app::State::init(g_engine::vec2<int> initial_size, const char *title,
     ImGui_ImplOpenGL3_Init();
 
     ImGuiIO &imgui_io = ImGui::GetIO();
-    imgui_io.Fonts->AddFontFromFileTTF("assets/roboto_mono_medium.ttf", 18.0f);
+    imgui_io.Fonts->AddFontFromFileTTF("assets/inconsolata_medium.ttf", 18.0f);
 
     buf = std::getenv("HOME");
 }
@@ -29,7 +29,12 @@ void app::State::run() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
 
-    app::showDirList(&dir_result, &listbox_state, buf,"here is a short description!");
+    if (dir_result.show_window) {
+        app::showDirList(&dir_result, &listbox_state, buf,
+                         "Select an image. The image type must be "
+                         "*.jpg, *.jpeg, *.png, *.bmp or *.tga.");
+    }
+
     ImGui::ShowDemoWindow();
 
     ImGui::Render();
