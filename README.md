@@ -4,7 +4,7 @@
 </div>
 
 ## Roadmap
-Currently the following features is noted in the roadmap if ImageLAB.
+Currently the following features are noted in the roadmap for ImageLAB.
 - [ ] Grayscale (Avarage, Eye Corrected, Desaturated)
 - [ ] Brightness
 - [ ] Tint
@@ -17,4 +17,4 @@ Currently the following features is noted in the roadmap if ImageLAB.
 
 ## Building
 Currenly, the `build.py` script only works for Windows & Linux. Though, *Building on **Windows** is not tested*.
-Just run the `build.py` script and hope building is successful.
+Just run the `build.py` script and hope that building is successful.
