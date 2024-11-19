@@ -1,5 +1,5 @@
 #include "include/state.hpp"
-#include "include/dir_window.hpp"
+#include "include/file_dialog.hpp"
 
 #include "../vendor/include/imgui/imgui.h"
 #include "../vendor/include/imgui/imgui_impl_glfw.h"
@@ -29,10 +29,10 @@ void app::State::run() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
 
-    if (dir_result.show_window) {
-        app::showDirList(&dir_result, &listbox_state, buf,
-                         "Select an image. The image type must be "
-                         "*.jpg, *.jpeg, *.png, *.bmp or *.tga.");
+    if (image_file_dialog.show_window) {
+        image_file_dialog.show(&listbox_state, buf,
+                               "Select an image. The image type must be "
+                               "*.jpg, *.jpeg, *.png, *.bmp or *.tga.");
     }
 
     ImGui::ShowDemoWindow();

@@ -1,4 +1,4 @@
-#include "include/dir_window.hpp"
+#include "include/file_dialog.hpp"
 #include "../vendor/include/imgui/imgui.h"
 
 #include <cstdio>
@@ -7,7 +7,6 @@
 #include <cstring>
 #include <dirent.h>
 #include <sys/stat.h>
-#include <iostream>
 
 static void appendPath(std::string &s, const std::string &appendix) {
     if (s.back() != '/') s.push_back('/');
@@ -57,9 +56,11 @@ static std::vector<std::string> listDir(const char *in_dir) {
 }
 
 
-void app::showDirList(DirListResult *result, ListBoxState *state,
-                      std::string &base_path, const char *desc) {
-    ImGui::Begin("File > Open", &result->show_window);
+void app::FileDialog::show(ListBoxState *state,
+                           std::string &base_path, const char *desc) {
+    if(!ImGui::Begin("File > Open", &show_window)) {
+        return;
+    }
 
     if (ImGui::Button("<")) {
         removeLastPath(base_path);
@@ -71,11 +72,11 @@ void app::showDirList(DirListResult *result, ListBoxState *state,
 
     if (!ImGui::BeginListBox("##1", {-1.0f, 0.0f})) {
         ImGui::End();
-        ImGui::EndListBox();
         return;
     }
     
     std::vector<std::string> vec = listDir(base_path.c_str());
+    struct stat selected_stat;
     for (int i = 0; i < vec.size(); i++) {
         state->selected = (state->selected_idx == i);
 
@@ -91,9 +92,8 @@ void app::showDirList(DirListResult *result, ListBoxState *state,
         if (state->selected && state->selected_idx == state->old_selected_idx) {
             appendPath(base_path, vec[i]);
 
-            struct stat selected_stat;
             if (stat(base_path.c_str(), &selected_stat) != 0) {
-                result->show_window = false;
+                show_window = false;
                 break;
             }
 
@@ -103,10 +103,8 @@ void app::showDirList(DirListResult *result, ListBoxState *state,
                 state->selected = false;
             }
             else {
-                // TODO: Invalid file check.
-                // And return path if valid file is selected.
-                checkIfPathImage(base_path);
-                result->show_window = false;
+                show_window = false;
+                file_path = base_path;
             }
         }
     }
@@ -114,9 +112,25 @@ void app::showDirList(DirListResult *result, ListBoxState *state,
 
     ImGui::TextWrapped("Description:\n%s", desc);
 
-    ImGui::Button("Ok");
+    if (ImGui::Button("Ok")) {
+        if (state->selected_idx < 0) {
+            show_window = false;
+        } else {
+            appendPath(base_path, vec[state->selected_idx]);
+
+            if (stat(base_path.c_str(), &selected_stat) != 0) {
+                show_window = false;
+            }
+            else if (!(selected_stat.st_mode & S_IFDIR)) {
+                show_window = false;
+                file_path = base_path;
+            }
+        }
+    }
     ImGui::SameLine();
-    ImGui::Button("Cancel");
+    if (ImGui::Button("Cancel")) {
+        show_window = false;
+    }
 
     ImGui::End();
 }
