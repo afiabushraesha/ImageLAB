@@ -21,20 +21,6 @@ static void removeLastPath(std::string &s) {
     s.resize(s.size() - (s.size() - i));
 }
 
-static bool checkIfPathImage(const std::string &s) {
-    std::string type = s.substr(s.size() - 5, 5);
-    if (type == ".jpeg") return true;
-
-    type = s.substr(s.size() - 4, 4);
-
-    if (type == ".jpg" || type == ".png" ||
-        type == ".bmp" || type == ".tga") {
-        return true;
-    }
-
-    return false;
-}
-
 static std::vector<std::string> listDir(const char *in_dir) {
     DIR *dir = NULL;
     dirent *dir_entry = NULL;
@@ -121,7 +107,12 @@ void app::FileDialog::show(ListBoxState *state,
             if (stat(base_path.c_str(), &selected_stat) != 0) {
                 show_window = false;
             }
-            else if (!(selected_stat.st_mode & S_IFDIR)) {
+            else if (selected_stat.st_mode & S_IFDIR) {
+                state->selected_idx = -1;
+                state->old_selected_idx = 0;
+                state->selected = false;
+            }
+            else {
                 show_window = false;
                 file_path = base_path;
             }
