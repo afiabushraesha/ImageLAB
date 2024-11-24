@@ -1,31 +1,36 @@
 #include "include/texture.hpp"
 #include "include/shader.hpp"
 
-#include "../../vendor/include/imago2/imago2.h"
 #include "../../vendor/include/glad/glad.h"
+#include <cstdio>
 
-void g_engine::Texture::init(img_pixmap img) {
-    glGenTextures(1, &m_texture);
-    glBindTexture(GL_TEXTURE_2D, m_texture);
+GLuint g_engine::textureInit(const unsigned char *pixels, g_engine::vec2<int> texture_size, int channels) {
+    GLuint texture_id;
+    glGenTextures(1, &texture_id);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, img.pixelsz == 3 ? GL_RGB : GL_RGBA, img.width,
-                 img.height, 0, img.pixelsz == 3 ? GL_RGB : GL_RGBA,
-                 GL_UNSIGNED_BYTE, img.pixels);
+    GLenum format;
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture_size.x, texture_size.y,
+                 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    return texture_id;
 }
 
-void g_engine::Texture::deinit() {
-    glDeleteTextures(1, &m_texture);
+void g_engine::textureDeinit(unsigned int *texture_id) {
+    glDeleteTextures(1, texture_id);
 }
 
-void g_engine::Texture::use(int slot, const char *uniform_name, g_engine::Shader *shader) {
+void g_engine::textureUse(unsigned int *texture_id, int slot,
+                          const char *uniform_name, g_engine::Shader *shader) {
     glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(GL_TEXTURE_2D, m_texture);
+    glBindTexture(GL_TEXTURE_2D, *texture_id);
     glUniform1i(glGetUniformLocation(shader->m_shader_bin, uniform_name), slot);
 }

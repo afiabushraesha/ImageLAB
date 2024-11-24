@@ -18,7 +18,7 @@ cpp_include_dirs = [
 ]
 
 cpp_lib_dirs = ""
-cpp_libs = ["-lglfw3", "-lglm", "-limago"]
+cpp_libs = ["-lglfw3", "-lglm", "-lsoil2"]
 
 if sys.platform == "win32":
     cpp_lib_dirs = "-Lvendor/win32/"
