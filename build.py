@@ -18,16 +18,17 @@ cpp_include_dirs = [
 ]
 
 cpp_lib_dirs = ""
-cpp_libs = ["-lglfw3", "-lglm", "-lsoil2"]
+cpp_libs = ["-lglfw3", "-lsoil2"]
+
+cpp_flags = []
 
 if sys.platform == "win32":
-    cpp_lib_dirs = "-Lvendor/win32/"
+    cpp_lib_dirs = "-Lvendor/mingw_w64/"
     cpp_libs.extend(["-lopengl32", "-lUser32", "-lGdi32", "-lShell32"])
+    cpp_flags.extend(["-mwindows"])
 else:
     cpp_lib_dirs = "-Lvendor/linux_x86_64/"
     cpp_libs.extend(["-lGL", "-ldl"])
-
-cpp_flags = []
 
 # ------------------------------- #
 
@@ -75,7 +76,6 @@ def genBin(compiler, obj_files, bin_path, include_dirs, lib_dirs, libs, flags):
 if os.path.basename(__file__) == "build.py":
     compile_files = getFilesWithExtension(cpp_dirs, [".cpp", ".c"])
     os.makedirs("build/objs/", exist_ok=True)
-    os.makedirs("build/bin/", exist_ok=True)
 
     obj_files = []
 
@@ -89,5 +89,5 @@ if os.path.basename(__file__) == "build.py":
 
     print("\nCompiling:")
 
-    genBin(cpp_compiler, obj_files, "build/bin/ImageLab",
+    genBin(cpp_compiler, obj_files, "./ImageLab",
            cpp_include_dirs, cpp_lib_dirs, cpp_libs, cpp_flags)
