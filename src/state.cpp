@@ -6,6 +6,8 @@
 #include "../vendor/include/imgui/imgui_impl_glfw.h"
 #include "../vendor/include/imgui/imgui_impl_opengl3.h"
 
+#include <iostream>
+
 // TODO: Implement new colorscheme
 static ImVec4 hexToNormalizedRgb(unsigned int hex) {
     return ImVec4(
@@ -26,14 +28,14 @@ void app::State::init(g_engine::vec2<int> initial_size, const char *title,
     ImGui_ImplOpenGL3_Init();
 
     ImGuiIO &imgui_io = ImGui::GetIO();
-    imgui_io.Fonts->AddFontFromFileTTF("assets/roboto_mono_medium.ttf", 16.0f);
+    imgui_io.Fonts->AddFontFromFileTTF("assets/roboto_mono_medium.ttf", 20.0f);
 
     ImGuiStyle &imgui_style = ImGui::GetStyle();
 
     // TODO: Implement new colorscheme
-    //imgui_style.WindowRounding = 0;
-    //imgui_style.FrameRounding = 0;
-    //imgui_style.ScrollbarRounding = 0;
+    imgui_style.WindowRounding = 0;
+    imgui_style.FrameRounding = 0;
+    imgui_style.ScrollbarRounding = 0;
 
     //imgui_style.Colors[ImGuiCol_Text]                  = ImVec4();
     //imgui_style.Colors[ImGuiCol_TextDisabled]          = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
@@ -70,8 +72,11 @@ void app::State::init(g_engine::vec2<int> initial_size, const char *title,
     //imgui_style.Colors[ImGuiCol_PlotHistogramHovered]  = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
     //imgui_style.Colors[ImGuiCol_TextSelectedBg]        = ImVec4(0.00f, 0.00f, 1.00f, 0.35f);
 
-
-    home_path = std::getenv("HOME");
+    #ifdef _WIN32
+        home_path = std::getenv("USERPROFILE"); 
+    #else
+        home_path = std::getenv("HOME");
+    #endif
 }
 
 void app::State::run() {

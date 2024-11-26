@@ -1,4 +1,5 @@
 #include "include/state.hpp"
+#include <iostream>
 
 int main() {
     app::State state;
