@@ -3,11 +3,12 @@
 
 #include "types.hpp"
 
+#include "../../../vendor/include/glad/glad.h"
+
 namespace g_engine {
     struct Vertex {
-        vec2<float> coord;
-        vec2<float> tex_coords;
-        vec3<float> color;
+        float coord[2];
+        float tex_coords[2];
     };
 
     struct Buffer {
@@ -16,7 +17,8 @@ namespace g_engine {
         unsigned int m_ebo;
 
         void init(unsigned int vertices_size, Vertex *vertices,
-                  unsigned int indices_size, unsigned int *indices);
+                  unsigned int indices_size, unsigned int *indices,
+                  GLenum vertices_draw_method, GLenum indices_draw_method);
         void deinit();
         void use();
     };

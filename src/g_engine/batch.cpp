@@ -58,7 +58,7 @@ void g_engine::Batch<cap>::drawQuadC(vec2<float> size, vec2<float> pos,
 
 template<unsigned int cap>
 void g_engine::Batch<cap>::drawQuadT(vec2<float> size, vec2<float> pos,
-                                     vec2<float> *texture_coords) {
+                                     const vec2<float> *texture_coords) {
     if (m_total_quads == cap) {
         endFrame();
         beginFrame();
@@ -77,7 +77,7 @@ void g_engine::Batch<cap>::drawQuadT(vec2<float> size, vec2<float> pos,
 
 template<unsigned int cap>
 void g_engine::Batch<cap>::drawQuadCT(vec2<float> size, vec2<float> pos,
-                                      vec3<float> color, vec2<float> *texture_coords) {
+                                      vec3<float> color, const vec2<float> *texture_coords) {
     if (m_total_quads == cap) {
         endFrame();
         beginFrame();

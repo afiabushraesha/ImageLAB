@@ -4,18 +4,19 @@
 #include <cstddef>
 
 void g_engine::Buffer::init(unsigned int vertices_size, Vertex *vertices,
-                            unsigned int indices_size, unsigned int *indices) {
+                            unsigned int indices_size, unsigned int *indices,
+                            GLenum vertices_draw_method, GLenum indices_draw_method) {
     glGenVertexArrays(1, &m_vao);
     glBindVertexArray(m_vao);
 
     glGenBuffers(1, &m_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices_size, vertices, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices_size, vertices, vertices_draw_method);
 
     if (indices_size != 0 && indices != NULL) {
         glGenBuffers(1, &m_ebo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_size, indices, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_size, indices, indices_draw_method);
     }
 
     // vertex coordinates
@@ -25,10 +26,6 @@ void g_engine::Buffer::init(unsigned int vertices_size, Vertex *vertices,
     // texture coordinates
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(2 * sizeof(float)));
-
-    // colors
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(4 * sizeof(float)));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);

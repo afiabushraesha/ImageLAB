@@ -1,6 +1,10 @@
 #include "include/state.hpp"
+#include "g_engine/include/buffer.hpp"
 #include "include/file_dialog.hpp"
 #include "include/image.hpp"
+
+#include "g_engine/include/shader.hpp"
+#include "g_engine/include/texture.hpp"
 
 #include "../vendor/include/imgui/imgui.h"
 #include "../vendor/include/imgui/imgui_impl_glfw.h"
@@ -69,12 +73,44 @@ void app::State::init(g_engine::vec2<int> initial_size, const char *title,
     //imgui_style.Colors[ImGuiCol_PlotHistogram]         = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
     //imgui_style.Colors[ImGuiCol_PlotHistogramHovered]  = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
     //imgui_style.Colors[ImGuiCol_TextSelectedBg]        = ImVec4(0.00f, 0.00f, 1.00f, 0.35f);
-
+    
     #ifdef _WIN32
         home_path = std::getenv("USERPROFILE"); 
     #else
         home_path = std::getenv("HOME");
     #endif
+
+    const char *img_vshader = R"(
+        #version 330
+
+        layout(location = 0) in vec2 pos;
+        layout(location = 1) in vec2 texture_coords;
+
+        uniform mat4 proj;
+        uniform mat4 view;
+        out vec2 v_texture_coords;
+
+        void main() {
+            gl_Position = proj * view * vec4(pos, 0.0f, 1.0f);
+            v_texture_coords = texture_coords;
+        }
+    )";
+
+    const char *img_fshader = R"(
+        #version 330
+
+        out vec4 out_color;
+        in vec2 v_texture_coords;
+
+        uniform sampler2D image_texture;
+
+        void main() {
+            out_color = texture(image_texture, v_texture_coords);
+        }
+    )";
+
+    g_engine::shaderInit(&img_shader, img_vshader, img_fshader);
+    view_mat = glm::translate(glm::mat4(1.0f), {0.0f, 0.0f, -1.0f});
 }
 
 void app::State::run() {
@@ -100,7 +136,8 @@ void app::State::run() {
     }
 
     for (app::Image &img : imgs) {
-        img.show(imgui_style.WindowPadding);
+        img.renderToViewport(img_shader, &img_proj_mat, view_mat);
+        // img.show(imgui_style.WindowPadding);
     }
 
     ImGui::Render();
@@ -114,6 +151,7 @@ void app::State::deinit() {
         img.deinit();
     }
 
+    g_engine::shaderDeinit(img_shader);
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();

@@ -1,6 +1,7 @@
 #include "include/shader.hpp"
 
 #include "../../vendor/include/glad/glad.h"
+
 #include <cstdio>
 
 static void checkShaderErrors(unsigned vsfs_shader_bin, GLenum shader_type) {
@@ -16,7 +17,7 @@ static void checkShaderErrors(unsigned vsfs_shader_bin, GLenum shader_type) {
     }
 }
 
-void g_engine::Shader::init(const char *vs_source, const char *fs_source) {
+void g_engine::shaderInit(GLuint *shader, const char *vs_source, const char *fs_source) {
     unsigned int vs_bin = glCreateShader(GL_VERTEX_SHADER);
     unsigned int fs_bin = glCreateShader(GL_FRAGMENT_SHADER);
 
@@ -29,19 +30,19 @@ void g_engine::Shader::init(const char *vs_source, const char *fs_source) {
     checkShaderErrors(vs_bin, GL_VERTEX_SHADER);
     checkShaderErrors(fs_bin, GL_FRAGMENT_SHADER);
 
-    m_shader_bin = glCreateProgram();
-    glAttachShader(m_shader_bin, vs_bin);
-    glAttachShader(m_shader_bin, fs_bin);
+    *shader = glCreateProgram();
+    glAttachShader(*shader, vs_bin);
+    glAttachShader(*shader, fs_bin);
 
     glDeleteShader(vs_bin);
     glDeleteShader(fs_bin);
-    glLinkProgram(m_shader_bin);
+    glLinkProgram(*shader);
 }
 
-void g_engine::Shader::deinit() {
-    glDeleteProgram(m_shader_bin);
+void g_engine::shaderDeinit(GLuint shader) {
+    glDeleteProgram(shader);
 }
 
-void g_engine::Shader::use() {
-    glUseProgram(m_shader_bin);
+void g_engine::shaderUse(GLuint shader) {
+    glUseProgram(shader);
 }

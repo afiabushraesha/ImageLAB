@@ -1,10 +1,9 @@
 #include "include/texture.hpp"
-#include "include/shader.hpp"
 
 #include "../../vendor/include/glad/glad.h"
-#include <cstdio>
 
-GLuint g_engine::textureInit(const unsigned char *pixels, g_engine::vec2<int> texture_size, int channels) {
+GLuint g_engine::textureInit(const unsigned char *pixels,
+                             g_engine::vec2<int> texture_size, int channels) {
     GLuint texture_id;
     glGenTextures(1, &texture_id);
     glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -22,13 +21,13 @@ GLuint g_engine::textureInit(const unsigned char *pixels, g_engine::vec2<int> te
     return texture_id;
 }
 
-void g_engine::textureDeinit(unsigned int *texture_id) {
+void g_engine::textureDeinit(GLuint *texture_id) {
     glDeleteTextures(1, texture_id);
 }
 
-void g_engine::textureUse(unsigned int *texture_id, int slot,
-                          const char *uniform_name, g_engine::Shader *shader) {
+void g_engine::textureUse(GLuint texture_id, int slot,
+                          const char *uniform_name, GLuint shader) {
     glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(GL_TEXTURE_2D, *texture_id);
-    glUniform1i(glGetUniformLocation(shader->m_shader_bin, uniform_name), slot);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+    glUniform1i(glGetUniformLocation(shader, uniform_name), slot);
 }

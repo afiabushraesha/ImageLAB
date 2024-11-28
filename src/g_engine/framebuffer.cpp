@@ -8,6 +8,8 @@ void g_engine::FrameBuffer::init(g_engine::vec2<int> window_size) {
     glGenTextures(1, &tex_id);
     glBindTexture(GL_TEXTURE_2D, tex_id);
 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     
@@ -26,6 +28,7 @@ void g_engine::FrameBuffer::init(g_engine::vec2<int> window_size) {
 
 void g_engine::FrameBuffer::deinit() {
     glDeleteFramebuffers(1, &buf);
+    glDeleteTextures(1, &tex_id);
 }
  
 void g_engine::FrameBuffer::enable() {
