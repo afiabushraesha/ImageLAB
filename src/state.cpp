@@ -6,8 +6,6 @@
 #include "../vendor/include/imgui/imgui_impl_glfw.h"
 #include "../vendor/include/imgui/imgui_impl_opengl3.h"
 
-#include <iostream>
-
 // TODO: Implement new colorscheme
 static ImVec4 hexToNormalizedRgb(unsigned int hex) {
     return ImVec4(

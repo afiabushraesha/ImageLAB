@@ -14,8 +14,6 @@ GLuint g_engine::textureInit(const unsigned char *pixels, g_engine::vec2<int> te
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    GLenum format;
-
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture_size.x, texture_size.y,
                  0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 

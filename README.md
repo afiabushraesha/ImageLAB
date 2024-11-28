@@ -8,13 +8,17 @@ Currently the following features are noted in the roadmap for ImageLAB.
 - [ ] Grayscale (Avarage, Eye Corrected, Desaturated)
 - [ ] Brightness
 - [ ] Tint
+- [ ] Contrast
 - [ ] Crop
 - [ ] Filters on Crop
 - [ ] Edge Detection (Sobel)
 - [ ] Blur (Gaussian)
 - [ ] Color Quantization
-- [ ] Noise
+- [ ] Noise (Hurl)
+- [ ] Stegnography
+- [ ] Change Detection
+- [ ] Sharpening
 
 ## Building
-Currenly, the `build.py` script only works for Windows & Linux. Though, *Building on **Windows** is not tested*.
+Currenly, the `build.py` script only works for Windows & Linux.
 Just run the `build.py` script and hope that building is successful.
