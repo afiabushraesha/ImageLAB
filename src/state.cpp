@@ -1,16 +1,14 @@
 #include "include/state.hpp"
-#include "g_engine/include/buffer.hpp"
 #include "include/file_dialog.hpp"
 #include "include/image.hpp"
 
 #include "g_engine/include/shader.hpp"
-#include "g_engine/include/texture.hpp"
 
 #include "../vendor/include/imgui/imgui.h"
 #include "../vendor/include/imgui/imgui_impl_glfw.h"
 #include "../vendor/include/imgui/imgui_impl_opengl3.h"
 
-// TODO: Implement new colorscheme
+// TODO: Implement new colorscheme, should be part of src/theme.cpp
 static ImVec4 hexToNormalizedRgb(unsigned int hex) {
     return ImVec4(
         ((hex      ) & 0xff) / 255.0f,
@@ -34,7 +32,7 @@ void app::State::init(g_engine::vec2<int> initial_size, const char *title,
 
     ImGuiStyle &imgui_style = ImGui::GetStyle();
 
-    // TODO: Implement new colorscheme
+    // TODO: Implement new colorscheme, should be part of src/theme.cpp
     imgui_style.WindowRounding = 0;
     imgui_style.FrameRounding = 0;
     imgui_style.ScrollbarRounding = 0;
@@ -80,46 +78,26 @@ void app::State::init(g_engine::vec2<int> initial_size, const char *title,
         home_path = std::getenv("HOME");
     #endif
 
-    const char *img_vshader = R"(
-        #version 330
 
-        layout(location = 0) in vec2 pos;
-        layout(location = 1) in vec2 texture_coords;
-
-        uniform mat4 proj;
-        uniform mat4 view;
-        out vec2 v_texture_coords;
-
-        void main() {
-            gl_Position = proj * view * vec4(pos, 0.0f, 1.0f);
-            v_texture_coords = texture_coords;
-        }
-    )";
-
-    const char *img_fshader = R"(
-        #version 330
-
-        out vec4 out_color;
-        in vec2 v_texture_coords;
-
-        uniform sampler2D image_texture;
-
-        void main() {
-            out_color = texture(image_texture, v_texture_coords);
-        }
-    )";
-
-    g_engine::shaderInit(&img_shader, img_vshader, img_fshader);
+    g_engine::shaderInitFromFile(&img_shader,
+                                 "assets/img_vertex_shader.glsl", 
+                                 "assets/img_fragment_shader.glsl");
     view_mat = glm::translate(glm::mat4(1.0f), {0.0f, 0.0f, -1.0f});
 }
 
 void app::State::run() {
-    const ImGuiStyle &imgui_style = ImGui::GetStyle();
-    window.beginFrame(window_color);
-    
     ImGui_ImplGlfw_NewFrame();
     ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
+
+    const ImGuiStyle &imgui_style = ImGui::GetStyle();
+
+    for (app::Image &img : imgs) {
+        img.renderToViewport(img_shader, &img_proj_mat, view_mat);
+        img.show(imgui_style.WindowPadding);
+    }
+
+    window.beginFrame(window_color);
 
     if (img_file_dialog.show_window) {
         img_file_dialog.show(&listbox_state, home_path,
@@ -133,11 +111,6 @@ void app::State::run() {
         }
 
         img_file_dialog.file_path.erase();
-    }
-
-    for (app::Image &img : imgs) {
-        img.renderToViewport(img_shader, &img_proj_mat, view_mat);
-        // img.show(imgui_style.WindowPadding);
     }
 
     ImGui::Render();

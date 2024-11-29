@@ -1,8 +1,11 @@
 #include "include/shader.hpp"
+#include "include/log.hpp"
 
 #include "../../vendor/include/glad/glad.h"
 
 #include <cstdio>
+#include <fstream>
+#include <string>
 
 static void checkShaderErrors(unsigned vsfs_shader_bin, GLenum shader_type) {
     int success;
@@ -37,6 +40,33 @@ void g_engine::shaderInit(GLuint *shader, const char *vs_source, const char *fs_
     glDeleteShader(vs_bin);
     glDeleteShader(fs_bin);
     glLinkProgram(*shader);
+}
+
+void g_engine::shaderInitFromFile(GLuint *shader, const char *vs_path,
+                                  const char *fs_path) {
+    std::ifstream file(vs_path);
+    std::string vs_source, fs_source, line;
+
+    g_engine_log_error(!file.is_open(),
+                       "failed to open vertex shader file!");
+
+    while (std::getline(file, line, '\n')) {
+        vs_source.append(line + '\n');
+    }
+
+    file.close();
+
+    file.open(fs_path); 
+    g_engine_log_error(!file.is_open(),
+                       "failed to open fragment shader file!");
+
+    while (std::getline(file, line, '\n')) {
+        fs_source.append(line + '\n');
+    }
+
+    file.close();
+
+    g_engine::shaderInit(shader, vs_source.c_str(), fs_source.c_str());
 }
 
 void g_engine::shaderDeinit(GLuint shader) {

@@ -56,13 +56,14 @@ void app::Image::renderToViewport(GLuint shader, glm::mat4 *proj_mat, const glm:
     glUniformMatrix4fv(glGetUniformLocation(shader, "proj"), 1, GL_FALSE, glm::value_ptr(*proj_mat));
     glUniformMatrix4fv(glGetUniformLocation(shader, "view"), 1, GL_FALSE, glm::value_ptr(view_mat));
     
-    // m_framebuffer.enable();
+    m_framebuffer.enable();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     g_engine::shaderUse(shader);
     g_engine::textureUse(m_id, 0, "image_texture", shader);
     m_vertex_buffer.use();
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    // m_framebuffer.disable();
+    m_framebuffer.disable();
 }
 
 void app::Image::show(ImVec2 window_padding) {
@@ -72,7 +73,7 @@ void app::Image::show(ImVec2 window_padding) {
     });
 
     ImGui::Begin(m_name.c_str(), NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
-    ImGui::Image((intptr_t)m_id, (ImVec2){
+    ImGui::Image((intptr_t)m_framebuffer.tex_id, (ImVec2){
         (float)m_view_size.x,
         (float)m_view_size.y
     });
