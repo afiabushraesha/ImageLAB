@@ -15,11 +15,17 @@
 #include <string>
 
 namespace app {
-    struct Image {
-        g_engine::vec2<int> m_size;
-        g_engine::vec2<int> m_view_size;
-        int m_channels;
+    struct ImageData {
         unsigned char *m_pixels;
+        int m_channels;
+        g_engine::vec2<int> m_size;
+    };
+
+    struct Image {
+        ImageData m_data;
+        ImageData m_low_res_data;
+
+        g_engine::vec2<int> m_view_size;
         GLuint m_id;
         g_engine::Buffer m_vertex_buffer;
 

@@ -1,6 +1,7 @@
 #include "include/state.hpp"
 #include "include/file_dialog.hpp"
 #include "include/image.hpp"
+#include "include/main_menu.hpp"
 
 #include "g_engine/include/shader.hpp"
 
@@ -78,7 +79,6 @@ void app::State::init(g_engine::vec2<int> initial_size, const char *title,
         home_path = std::getenv("HOME");
     #endif
 
-
     g_engine::shaderInitFromFile(&img_shader,
                                  "assets/img_vertex_shader.glsl", 
                                  "assets/img_fragment_shader.glsl");
@@ -89,6 +89,8 @@ void app::State::run() {
     ImGui_ImplGlfw_NewFrame();
     ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
+
+    app::renderMainMenu(&img_file_dialog);
 
     const ImGuiStyle &imgui_style = ImGui::GetStyle();
 

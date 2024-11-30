@@ -12,10 +12,11 @@ namespace app {
 
     struct FileDialog {
         std::string file_path;
+        std::string crnt_dir;
         bool show_window = true;
 
         void show(ListBoxState *state,
-                  std::string &base_path, const char *desc);
+                  const std::string &base_path, const char *desc);
     };
 }
 

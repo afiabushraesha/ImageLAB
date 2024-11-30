@@ -15,7 +15,7 @@ Currently the following features are noted in the roadmap for ImageLAB.
 - [ ] Blur (Gaussian)
 - [ ] Color Quantization
 - [ ] Noise (Hurl)
-- [ ] Stegnography
+- [ ] Steganography
 - [ ] Change Detection
 - [ ] Sharpening
 

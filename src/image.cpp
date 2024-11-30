@@ -1,32 +1,111 @@
 #include "include/image.hpp"
+
 #include "g_engine/include/framebuffer.hpp"
 #include "g_engine/include/shader.hpp"
 #include "g_engine/include/texture.hpp"
+#include "g_engine/include/types.hpp"
  
 #include "../vendor/include/glad/glad.h"
 #include "../vendor/include/imgui/imgui.h"
 #include "../vendor/include/SOIL2/SOIL2.h"
 
-bool app::Image::init(const char *path, int prefered_height) {
-    m_pixels = SOIL_load_image(path, &m_size.x, &m_size.y,
-                               &m_channels, SOIL_LOAD_RGBA);
+static g_engine::vec4<unsigned char> getPixel(const app::ImageData &data,
+                                              const g_engine::vec2<size_t> &coord) {
+    const int idx =
+        coord.y * data.m_size.x * data.m_channels +
+        coord.x * data.m_channels;
 
-    float aspect = (float)m_size.x / (float)m_size.y;
-    m_view_size.x = aspect * prefered_height;
-    m_view_size.y = prefered_height;
+    g_engine::vec4<unsigned char> out = {
+        .x = data.m_pixels[idx + 0],
+        .y = data.m_pixels[idx + 1],
+        .z = data.m_pixels[idx + 2],
+        .w = data.m_channels == 4 ? data.m_pixels[idx + 3] : (unsigned char)0
+    };
 
-    if (m_pixels == NULL) {
+    return out;
+}
+
+static void setPixel(app::ImageData *data,
+                     const g_engine::vec2<size_t> &coord,
+                     const g_engine::vec4<unsigned char> &color) {
+    const int idx =
+        coord.y * data->m_size.x * data->m_channels +
+        coord.x * data->m_channels;
+
+    data->m_pixels[idx + 0] = color.x;
+    data->m_pixels[idx + 1] = color.y;
+    data->m_pixels[idx + 2] = color.z;
+
+    if (data->m_channels == 4) {
+        data->m_pixels[idx + 3] = color.w;
+    }
+}
+
+
+static void genLowResImage(app::ImageData *out_image,
+                           const app::ImageData &in_image, size_t xy_divisor) {
+    out_image->m_size.x = in_image.m_size.x / xy_divisor;
+    out_image->m_size.y = in_image.m_size.y / xy_divisor;
+    out_image->m_channels = in_image.m_channels;
+    out_image->m_pixels = (unsigned char *)malloc(out_image->m_size.x *
+                                                  out_image->m_size.y *
+                                                  out_image->m_channels);
+
+    g_engine::vec4<unsigned int> sum = {0, 0, 0, 0};
+    g_engine::vec4<unsigned char> crnt_pixel;
+
+    for (size_t y = 0; y < in_image.m_size.y - xy_divisor + 1; y += xy_divisor) {
+        for (size_t x = 0; x < in_image.m_size.x - xy_divisor + 1; x += xy_divisor) {
+            for (size_t square_y = y; square_y < y + xy_divisor; square_y++) {
+                for (size_t square_x = x; square_x < x + xy_divisor; square_x++) {
+                    crnt_pixel = getPixel(in_image, {square_x, square_y});
+                    sum.x += crnt_pixel.x;
+                    sum.y += crnt_pixel.y;
+                    sum.z += crnt_pixel.z;
+                    sum.w += crnt_pixel.w;
+                }
+            }
+
+            sum.x /= (xy_divisor * xy_divisor);
+            sum.y /= (xy_divisor * xy_divisor);
+            sum.z /= (xy_divisor * xy_divisor);
+            sum.w /= (xy_divisor * xy_divisor);
+
+            setPixel(out_image, {
+                (size_t)(x / xy_divisor),
+                (size_t)(y / xy_divisor)
+            }, {
+                (unsigned char)sum.x,
+                (unsigned char)sum.y,
+                (unsigned char)sum.z,
+                (unsigned char)sum.w,
+            });
+
+            sum = {0, 0, 0, 0};
+        }
+    }
+}
+
+bool app::Image::init(const char *path, int preferred_height) {
+    m_data.m_pixels = SOIL_load_image(path, &m_data.m_size.x, &m_data.m_size.y,
+                               &m_data.m_channels, SOIL_LOAD_RGBA);
+
+    float aspect = (float)m_data.m_size.x / (float)m_data.m_size.y;
+    m_view_size.x = aspect * preferred_height;
+    m_view_size.y = preferred_height;
+
+    if (m_data.m_pixels == NULL) {
         return false;
     }
 
     m_name = path;
-    m_id = g_engine::textureInit(m_pixels, m_size, m_channels);
+    m_id = g_engine::textureInit(m_data.m_pixels, m_data.m_size, m_data.m_channels);
 
     g_engine::Vertex texture_vertices[] = {
-        {{           0.0f,            0.0f}, {0.0f, 1.0f}},
-        {{           0.0f, (float)m_size.y}, {0.0f, 0.0f}},
-        {{(float)m_size.x, (float)m_size.y}, {1.0f, 0.0f}},
-        {{(float)m_size.x,            0.0f}, {1.0f, 1.0f}},
+        {{                  0.0f,                  0.0f}, {0.0f, 1.0f}},
+        {{                  0.0f,(float)m_data.m_size.y}, {0.0f, 0.0f}},
+        {{(float)m_data.m_size.x,(float)m_data.m_size.y}, {1.0f, 0.0f}},
+        {{(float)m_data.m_size.x,                  0.0f}, {1.0f, 1.0f}},
     };
 
     unsigned int texture_indices[] = {
@@ -37,22 +116,22 @@ bool app::Image::init(const char *path, int prefered_height) {
     m_vertex_buffer.init(sizeof(texture_vertices), texture_vertices,
                          sizeof(texture_indices), texture_indices,
                          GL_STATIC_DRAW, GL_STATIC_DRAW);
-    m_framebuffer.init(m_size);
+    m_framebuffer.init(m_data.m_size);
 
     return true;
 }
 
 void app::Image::deinit() {
-    SOIL_free_image_data(m_pixels);
+    SOIL_free_image_data(m_data.m_pixels);
     g_engine::textureDeinit(&m_id);
     m_vertex_buffer.deinit();
     m_framebuffer.deinit();
 }
 
 void app::Image::renderToViewport(GLuint shader, glm::mat4 *proj_mat, const glm::mat4 &view_mat) {
-    glViewport(0, 0, m_size.x, m_size.y);
+    glViewport(0, 0, m_data.m_size.x, m_data.m_size.y);
 
-    *proj_mat = glm::ortho(0.0f, (float)m_size.x, (float)m_size.y, 0.0f, 0.1f, 100.0f);
+    *proj_mat = glm::ortho(0.0f, (float)m_data.m_size.x, (float)m_data.m_size.y, 0.0f, 0.1f, 100.0f);
     glUniformMatrix4fv(glGetUniformLocation(shader, "proj"), 1, GL_FALSE, glm::value_ptr(*proj_mat));
     glUniformMatrix4fv(glGetUniformLocation(shader, "view"), 1, GL_FALSE, glm::value_ptr(view_mat));
     
