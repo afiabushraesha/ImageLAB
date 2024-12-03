@@ -90,30 +90,38 @@ void app::State::run() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
 
-    app::renderMainMenu(&img_file_dialog);
-
     const ImGuiStyle &imgui_style = ImGui::GetStyle();
+    window.beginFrame(window_color);
 
-    for (app::Image &img : imgs) {
+    if (img.m_loaded && img.m_effects.m_old_gates != img.m_effects.m_gates) {
+        img.passEffectDataGpu(img_shader);
         img.renderToViewport(img_shader, &img_proj_mat, view_mat);
-        img.show(imgui_style.WindowPadding);
+        img.m_effects.m_old_gates = img.m_effects.m_gates;
     }
 
-    window.beginFrame(window_color);
+    if (img.m_loaded) {
+        img.show(imgui_style.WindowPadding);
+    }
 
     if (img_file_dialog.show_window) {
         img_file_dialog.show(&listbox_state, home_path,
                              "Select an image. The image type must be "
                              "*.jpg, *.jpeg, *.png, *.bmp or *.tga.");
-    } else if (!img_file_dialog.file_path.empty() && app::checkIfPathImage(img_file_dialog.file_path)) {
-        app::Image img;
-        
-        if (img.init(img_file_dialog.file_path.c_str(), 480)) {
-            imgs.push_back(img);
+    } else if (!img_file_dialog.file_path.empty()) {
+        if (app::checkIfPathImage(img_file_dialog.file_path)) {
+            img.init(img_file_dialog.file_path.c_str(), 480);
+        }
+        if (img.m_loaded) {
+            img.renderToViewport(img_shader, &img_proj_mat, view_mat);
         }
 
         img_file_dialog.file_path.erase();
+        img_file_dialog.crnt_dir.erase();
+        listbox_state.reset();
     }
+
+    app::renderMainMenu(&img_file_dialog, &img, img_shader,
+                        &img_proj_mat, view_mat);
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -122,7 +130,7 @@ void app::State::run() {
 }
 
 void app::State::deinit() {
-    for (app::Image &img : imgs) {
+    if (img.m_loaded) {
         img.deinit();
     }
 

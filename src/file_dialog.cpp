@@ -87,11 +87,8 @@ void app::FileDialog::show(ListBoxState *state,
             }
 
             if (selected_stat.st_mode & S_IFDIR) {
-                state->selected_idx = -1;
-                state->old_selected_idx = 0;
-                state->selected = false;
-            }
-            else {
+                state->reset();
+            } else {
                 show_window = false;
                 file_path = crnt_dir;
             }
@@ -109,13 +106,9 @@ void app::FileDialog::show(ListBoxState *state,
 
             if (stat(crnt_dir.c_str(), &selected_stat) != 0) {
                 show_window = false;
-            }
-            else if (selected_stat.st_mode & S_IFDIR) {
-                state->selected_idx = -1;
-                state->old_selected_idx = 0;
-                state->selected = false;
-            }
-            else {
+            } else if (selected_stat.st_mode & S_IFDIR) {
+                state->reset();
+            } else {
                 show_window = false;
                 file_path = crnt_dir;
             }
@@ -127,4 +120,10 @@ void app::FileDialog::show(ListBoxState *state,
     }
 
     ImGui::End();
+}
+
+void app::ListBoxState::reset() {
+    selected_idx = -1;
+    old_selected_idx = 0;
+    selected = false;
 }

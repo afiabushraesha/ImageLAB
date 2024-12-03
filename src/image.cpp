@@ -43,7 +43,8 @@ static void setPixel(app::ImageData *data,
 
 
 static void genLowResImage(app::ImageData *out_image,
-                           const app::ImageData &in_image, size_t xy_divisor) {
+                           const app::ImageData &in_image,
+                           size_t xy_divisor) {
     out_image->m_size.x = in_image.m_size.x / xy_divisor;
     out_image->m_size.y = in_image.m_size.y / xy_divisor;
     out_image->m_channels = in_image.m_channels;
@@ -86,20 +87,30 @@ static void genLowResImage(app::ImageData *out_image,
     }
 }
 
-bool app::Image::init(const char *path, int preferred_height) {
+void copyImageRef(app::ImageData *dest, const app::ImageData &source) {
+    dest->m_size = source.m_size;
+    dest->m_channels = source.m_channels;
+    dest->m_pixels = source.m_pixels;
+}
+
+void app::Image::init(const char *path, int preferred_height) {
     m_data.m_pixels = SOIL_load_image(path, &m_data.m_size.x, &m_data.m_size.y,
-                               &m_data.m_channels, SOIL_LOAD_RGBA);
+                                      &m_data.m_channels, SOIL_LOAD_RGBA);
+    m_data.m_channels = 4;
 
     float aspect = (float)m_data.m_size.x / (float)m_data.m_size.y;
     m_view_size.x = aspect * preferred_height;
     m_view_size.y = preferred_height;
 
-    if (m_data.m_pixels == NULL) {
-        return false;
-    }
+    if (m_data.m_size.x >= (1 << 11) || m_data.m_size.y >= (1 << 11))
+        genLowResImage(&m_low_res_data, m_data, 4);
+    else
+        copyImageRef(&m_low_res_data, m_data);
 
     m_name = path;
-    m_id = g_engine::textureInit(m_data.m_pixels, m_data.m_size, m_data.m_channels);
+    m_id = g_engine::textureInit(m_low_res_data.m_pixels,
+                                 m_low_res_data.m_size,
+                                 m_low_res_data.m_channels);
 
     g_engine::Vertex texture_vertices[] = {
         {{                  0.0f,                  0.0f}, {0.0f, 1.0f}},
@@ -117,8 +128,8 @@ bool app::Image::init(const char *path, int preferred_height) {
                          sizeof(texture_indices), texture_indices,
                          GL_STATIC_DRAW, GL_STATIC_DRAW);
     m_framebuffer.init(m_data.m_size);
-
-    return true;
+    m_effects.init();
+    m_loaded = true;
 }
 
 void app::Image::deinit() {
@@ -128,15 +139,32 @@ void app::Image::deinit() {
     m_framebuffer.deinit();
 }
 
+void app::Image::passEffectDataGpu(GLuint shader) {
+    glUniform1ui(glGetUniformLocation(shader, "effect_gates"),
+                 m_effects.m_gates);
+    glUniform1f(glGetUniformLocation(shader, "brightness_multiple"),
+                m_effects.m_prop.m_brightness_multiple);
+    glUniform3f(glGetUniformLocation(shader, "tint_color"),
+                m_effects.m_prop.m_tint_color[0],
+                m_effects.m_prop.m_tint_color[1],
+                m_effects.m_prop.m_tint_color[2]);
+    glUniform1f(glGetUniformLocation(shader, "noise_intensity"),
+                m_effects.m_prop.m_noise_intensity);
+    glUniform1f(glGetUniformLocation(shader, "contrast_intensity"),
+                m_effects.m_prop.m_contrast_intensity);
+    glUniform1i(glGetUniformLocation(shader, "threshold_limit"),
+                m_effects.m_prop.m_threshold_limit);
+}
+
 void app::Image::renderToViewport(GLuint shader, glm::mat4 *proj_mat, const glm::mat4 &view_mat) {
+    m_framebuffer.enable();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport(0, 0, m_data.m_size.x, m_data.m_size.y);
 
     *proj_mat = glm::ortho(0.0f, (float)m_data.m_size.x, (float)m_data.m_size.y, 0.0f, 0.1f, 100.0f);
     glUniformMatrix4fv(glGetUniformLocation(shader, "proj"), 1, GL_FALSE, glm::value_ptr(*proj_mat));
     glUniformMatrix4fv(glGetUniformLocation(shader, "view"), 1, GL_FALSE, glm::value_ptr(view_mat));
-    
-    m_framebuffer.enable();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     g_engine::shaderUse(shader);
     g_engine::textureUse(m_id, 0, "image_texture", shader);
     m_vertex_buffer.use();

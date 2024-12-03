@@ -7,8 +7,6 @@
 #include "../g_engine/include/window.hpp"
 #include "../../vendor/include/glad/glad.h"
 
-#include <vector>
-
 namespace app {
     struct State {
         g_engine::Window window;
@@ -18,7 +16,7 @@ namespace app {
         ListBoxState listbox_state;
         FileDialog img_file_dialog;
 
-        std::vector<Image> imgs;
+        Image img;
         glm::mat4 img_proj_mat;
         glm::mat4 view_mat;
         GLuint img_shader;

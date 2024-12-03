@@ -8,6 +8,8 @@ namespace app {
         bool selected = false;
         int selected_idx = -1;
         int old_selected_idx = 0;
+
+        void reset();
     };
 
     struct FileDialog {
