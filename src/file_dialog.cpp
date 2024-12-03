@@ -5,7 +5,6 @@
 #include <vector>
 #include <string>
 #include <dirent.h>
-#include <sys/stat.h>
 
 static void appendPath(std::string &s, const std::string &appendix) {
     if (s.back() != '/') s.push_back('/');
@@ -20,7 +19,7 @@ static void removeLastPath(std::string &s) {
     s.resize(s.size() - (s.size() - i));
 }
 
-static std::vector<std::string> listDir(const char *in_dir) {
+static std::vector<std::string> listDir(const char *in_dir, app::ListDirMode mode) {
     DIR *dir = NULL;
     dirent *dir_entry = NULL;
     
@@ -32,31 +31,40 @@ static std::vector<std::string> listDir(const char *in_dir) {
     size_t k = 0;
 
     while ((dir_entry = readdir(dir)) != NULL) {
-        if (dir_entry->d_name[0] == '.') continue;
-        out.push_back(dir_entry->d_name);
+        if (dir_entry->d_name[0] == '.') {
+            continue;
+        }
+        if ((mode == app::ListDirMode::File && dir_entry->d_type == DT_REG) ||
+            (mode == app::ListDirMode::Folder && dir_entry->d_type == DT_DIR)) {
+            out.push_back(dir_entry->d_name);
+        }
+        else if (mode == app::ListDirMode::FileAndFolder) {
+            out.push_back(dir_entry->d_name);
+        }
     }
 
     closedir(dir);
     return out;
 }
 
+void app::FolderContentDialog::begin(ListBoxState *state, const char *window_title,
+                                     const std::string &base_path, ListDirMode mode) {
+    m_mode = mode;
 
-void app::FileDialog::show(ListBoxState *state,
-                           const std::string &base_path, const char *desc) {
-    if (crnt_dir.empty()) {
-        crnt_dir = base_path;
+    if (m_crnt_dir.empty()) {
+        m_crnt_dir = base_path;
     }
 
-    if(!ImGui::Begin("File > Open", &show_window)) {
+    if(!ImGui::Begin(window_title, &m_show_window)) {
         return;
     }
 
     if (ImGui::Button("<")) {
-        removeLastPath(crnt_dir);
+        removeLastPath(m_crnt_dir);
     }
 
     ImGui::SameLine();
-    ImGui::Text("Folder: %s", crnt_dir.c_str());
+    ImGui::Text("Folder: %s", m_crnt_dir.c_str());
     ImGui::Separator();
 
     if (!ImGui::BeginListBox("##1", {-1.0f, 0.0f})) {
@@ -64,12 +72,11 @@ void app::FileDialog::show(ListBoxState *state,
         return;
     }
     
-    std::vector<std::string> vec = listDir(crnt_dir.c_str());
-    struct stat selected_stat;
-    for (int i = 0; i < vec.size(); i++) {
+    m_item_list = listDir(m_crnt_dir.c_str(), mode);
+    for (int i = 0; i < m_item_list.size(); i++) {
         state->selected = (state->selected_idx == i);
 
-        if (ImGui::Selectable(vec[i].c_str(), state->selected)) {
+        if (ImGui::Selectable(m_item_list[i].c_str(), state->selected)) {
             state->old_selected_idx = state->selected_idx;
             state->selected_idx = i;
         }
@@ -79,47 +86,59 @@ void app::FileDialog::show(ListBoxState *state,
         }
 
         if (state->selected && state->selected_idx == state->old_selected_idx) {
-            appendPath(crnt_dir, vec[i]);
+            appendPath(m_crnt_dir, m_item_list[i]);
 
-            if (stat(crnt_dir.c_str(), &selected_stat) != 0) {
-                show_window = false;
+            if (stat(m_crnt_dir.c_str(), &m_item_stat) != 0) {
+                m_show_window = false;
                 break;
             }
 
-            if (selected_stat.st_mode & S_IFDIR) {
+            if (m_item_stat.st_mode & S_IFDIR) {
                 state->reset();
             } else {
-                show_window = false;
-                file_path = crnt_dir;
+                m_show_window = false;
+                m_path = m_crnt_dir;
             }
         }
     }
     ImGui::EndListBox();
+}
 
-    ImGui::TextWrapped("Description:\n%s", desc);
-
+void app::FolderContentDialog::end(ListBoxState *state) {
     if (ImGui::Button("Ok")) {
         if (state->selected_idx < 0) {
-            show_window = false;
+            m_show_window = false;
         } else {
-            appendPath(crnt_dir, vec[state->selected_idx]);
+            appendPath(m_crnt_dir, m_item_list[state->selected_idx]);
 
-            if (stat(crnt_dir.c_str(), &selected_stat) != 0) {
-                show_window = false;
-            } else if (selected_stat.st_mode & S_IFDIR) {
+            if (stat(m_crnt_dir.c_str(), &m_item_stat) != 0) {
+                m_show_window = false;
+            } else if ((m_item_stat.st_mode & S_IFDIR) && m_mode == ListDirMode::FileAndFolder) {
                 state->reset();
+            } else if ((m_item_stat.st_mode & S_IFDIR) && m_mode == ListDirMode::Folder) {
+                state->reset();
+                m_show_window = false;
             } else {
-                show_window = false;
-                file_path = crnt_dir;
+                m_show_window = false;
+                m_path = m_crnt_dir;
             }
         }
     }
+
     ImGui::SameLine();
+
     if (ImGui::Button("Cancel")) {
-        show_window = false;
+        m_show_window = false;
     }
 
     ImGui::End();
+}
+
+void app::dialogRenderImageImport(FolderContentDialog *dialog, ListBoxState *state,
+                                  const std::string &base_path, const char *desc) {
+    dialog->begin(state, "File > Open", base_path, ListDirMode::FileAndFolder);
+    ImGui::TextWrapped("%s", desc);
+    dialog->end(state);
 }
 
 void app::ListBoxState::reset() {

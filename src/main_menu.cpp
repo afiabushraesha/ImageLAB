@@ -1,15 +1,16 @@
 #include "include/main_menu.hpp"
 #include "include/effect.hpp"
 #include "include/effect_windows.hpp"
+#include "include/file_dialog.hpp"
 
 #include "../vendor/include/imgui/imgui.h"
 
-void app::renderMainMenu(FileDialog *file_dialog, Image *img,
+void app::renderMainMenu(FolderContentDialog *file_dialog, Image *img,
                          unsigned int shader, glm::mat4 *proj_mat, const glm::mat4 &view_mat) {
     if (!ImGui::BeginMainMenuBar()) return;
 
     if (ImGui::BeginMenu("File")) {
-        ImGui::MenuItem("Open", "CTRL+O", &file_dialog->show_window, !img->m_loaded);
+        ImGui::MenuItem("Open", "CTRL+O", &file_dialog->m_show_window, !img->m_loaded);
         ImGui::MenuItem("Export", "CTRL+E", false, img->m_loaded);
 
         ImGui::EndMenu();

@@ -7,7 +7,7 @@
 #include "../../vendor/include/glm/glm.hpp"
 
 namespace app {
-    void renderMainMenu(FileDialog *file_dialog, Image *img,
+    void renderMainMenu(FolderContentDialog *file_dialog, Image *img,
                         unsigned int shader, glm::mat4 *proj_mat, const glm::mat4 &view_mat);
 }
 

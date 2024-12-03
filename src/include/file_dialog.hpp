@@ -2,6 +2,8 @@
 #define _APP_DIR_WINDOW_H_
 
 #include <string>
+#include <vector>
+#include <sys/stat.h>
 
 namespace app {
     struct ListBoxState {
@@ -12,14 +14,27 @@ namespace app {
         void reset();
     };
 
-    struct FileDialog {
-        std::string file_path;
-        std::string crnt_dir;
-        bool show_window = true;
-
-        void show(ListBoxState *state,
-                  const std::string &base_path, const char *desc);
+    enum class ListDirMode : unsigned char {
+        FileAndFolder,
+        Folder,
+        File
     };
+
+    struct FolderContentDialog {
+        std::string m_path;
+        std::string m_crnt_dir;
+        std::vector<std::string> m_item_list;
+        struct stat m_item_stat;
+        ListDirMode m_mode;
+        bool m_show_window = false;
+
+        void begin(ListBoxState *state, const char *window_title,
+                   const std::string &base_path, ListDirMode mode);
+        void end(ListBoxState *state);
+    };
+
+    void dialogRenderImageImport(FolderContentDialog *dialog, ListBoxState *state,
+                                 const std::string &base_path, const char *desc);
 }
 
 #endif

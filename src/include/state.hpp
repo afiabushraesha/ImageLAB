@@ -14,7 +14,7 @@ namespace app {
         
         std::string home_path;
         ListBoxState listbox_state;
-        FileDialog img_file_dialog;
+        FolderContentDialog img_file_dialog;
 
         Image img;
         glm::mat4 img_proj_mat;
