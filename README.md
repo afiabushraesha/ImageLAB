@@ -5,9 +5,10 @@
 
 ## Roadmap
 Currently the following features are noted in the roadmap for ImageLAB.
-- [ ] Grayscale (Avarage, Eye Corrected, Desaturated)
-- [ ] Brightness
-- [ ] Tint
+- [x] Grayscale (Avarage, Eye Corrected, Desaturated)
+- [x] Brightness
+- [x] Tint
+- [x] Invert
 - [ ] Contrast
 - [ ] Crop
 - [ ] Filters on Crop
