@@ -4,7 +4,6 @@
 #include <cstdio>
 #include <vector>
 #include <string>
-#include <cstring>
 #include <dirent.h>
 #include <sys/stat.h>
 
@@ -43,17 +42,21 @@ static std::vector<std::string> listDir(const char *in_dir) {
 
 
 void app::FileDialog::show(ListBoxState *state,
-                           std::string &base_path, const char *desc) {
+                           const std::string &base_path, const char *desc) {
+    if (crnt_dir.empty()) {
+        crnt_dir = base_path;
+    }
+
     if(!ImGui::Begin("File > Open", &show_window)) {
         return;
     }
 
     if (ImGui::Button("<")) {
-        removeLastPath(base_path);
+        removeLastPath(crnt_dir);
     }
 
     ImGui::SameLine();
-    ImGui::Text("Folder: %s", base_path.c_str());
+    ImGui::Text("Folder: %s", crnt_dir.c_str());
     ImGui::Separator();
 
     if (!ImGui::BeginListBox("##1", {-1.0f, 0.0f})) {
@@ -61,7 +64,7 @@ void app::FileDialog::show(ListBoxState *state,
         return;
     }
     
-    std::vector<std::string> vec = listDir(base_path.c_str());
+    std::vector<std::string> vec = listDir(crnt_dir.c_str());
     struct stat selected_stat;
     for (int i = 0; i < vec.size(); i++) {
         state->selected = (state->selected_idx == i);
@@ -76,21 +79,18 @@ void app::FileDialog::show(ListBoxState *state,
         }
 
         if (state->selected && state->selected_idx == state->old_selected_idx) {
-            appendPath(base_path, vec[i]);
+            appendPath(crnt_dir, vec[i]);
 
-            if (stat(base_path.c_str(), &selected_stat) != 0) {
+            if (stat(crnt_dir.c_str(), &selected_stat) != 0) {
                 show_window = false;
                 break;
             }
 
             if (selected_stat.st_mode & S_IFDIR) {
-                state->selected_idx = -1;
-                state->old_selected_idx = 0;
-                state->selected = false;
-            }
-            else {
+                state->reset();
+            } else {
                 show_window = false;
-                file_path = base_path;
+                file_path = crnt_dir;
             }
         }
     }
@@ -102,19 +102,15 @@ void app::FileDialog::show(ListBoxState *state,
         if (state->selected_idx < 0) {
             show_window = false;
         } else {
-            appendPath(base_path, vec[state->selected_idx]);
+            appendPath(crnt_dir, vec[state->selected_idx]);
 
-            if (stat(base_path.c_str(), &selected_stat) != 0) {
+            if (stat(crnt_dir.c_str(), &selected_stat) != 0) {
                 show_window = false;
-            }
-            else if (selected_stat.st_mode & S_IFDIR) {
-                state->selected_idx = -1;
-                state->old_selected_idx = 0;
-                state->selected = false;
-            }
-            else {
+            } else if (selected_stat.st_mode & S_IFDIR) {
+                state->reset();
+            } else {
                 show_window = false;
-                file_path = base_path;
+                file_path = crnt_dir;
             }
         }
     }
@@ -124,4 +120,10 @@ void app::FileDialog::show(ListBoxState *state,
     }
 
     ImGui::End();
+}
+
+void app::ListBoxState::reset() {
+    selected_idx = -1;
+    old_selected_idx = 0;
+    selected = false;
 }

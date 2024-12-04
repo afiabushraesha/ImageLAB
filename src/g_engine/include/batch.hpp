@@ -5,15 +5,14 @@
 #include "types.hpp"
 
 namespace g_engine {
-    class Vertex;
-    class Buffer;
-
     template<unsigned int square_capacity>
-    class Batch {
+    struct Batch {
         Vertex m_vertices[square_capacity * 4];
         unsigned int m_indices[square_capacity * 6];
         unsigned int m_total_quads = 0;
         Buffer m_buffer;
+
+        const unsigned int m_capacity = square_capacity;
 
         void init();
         void deinit();
@@ -21,9 +20,9 @@ namespace g_engine {
         void endFrame();
 
         void drawQuadC(vec2<float> size, vec2<float> pos, vec3<float> color);
-        void drawQuadT(vec2<float> size, vec2<float> pos, vec2<float> *texture_coords);
+        void drawQuadT(vec2<float> size, vec2<float> pos, const vec2<float> *texture_coords);
         void drawQuadCT(vec2<float> size, vec2<float> pos, vec3<float> color,
-                        vec2<float> *texture_coords);
+                        const vec2<float> *texture_coords);
     };
 }
 

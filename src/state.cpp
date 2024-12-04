@@ -1,14 +1,15 @@
 #include "include/state.hpp"
 #include "include/file_dialog.hpp"
 #include "include/image.hpp"
+#include "include/main_menu.hpp"
+
+#include "g_engine/include/shader.hpp"
 
 #include "../vendor/include/imgui/imgui.h"
 #include "../vendor/include/imgui/imgui_impl_glfw.h"
 #include "../vendor/include/imgui/imgui_impl_opengl3.h"
 
-#include <iostream>
-
-// TODO: Implement new colorscheme
+// TODO: Implement new colorscheme, should be part of src/theme.cpp
 static ImVec4 hexToNormalizedRgb(unsigned int hex) {
     return ImVec4(
         ((hex      ) & 0xff) / 255.0f,
@@ -32,7 +33,7 @@ void app::State::init(g_engine::vec2<int> initial_size, const char *title,
 
     ImGuiStyle &imgui_style = ImGui::GetStyle();
 
-    // TODO: Implement new colorscheme
+    // TODO: Implement new colorscheme, should be part of src/theme.cpp
     imgui_style.WindowRounding = 0;
     imgui_style.FrameRounding = 0;
     imgui_style.ScrollbarRounding = 0;
@@ -71,39 +72,56 @@ void app::State::init(g_engine::vec2<int> initial_size, const char *title,
     //imgui_style.Colors[ImGuiCol_PlotHistogram]         = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
     //imgui_style.Colors[ImGuiCol_PlotHistogramHovered]  = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
     //imgui_style.Colors[ImGuiCol_TextSelectedBg]        = ImVec4(0.00f, 0.00f, 1.00f, 0.35f);
-
+    
     #ifdef _WIN32
         home_path = std::getenv("USERPROFILE"); 
     #else
         home_path = std::getenv("HOME");
     #endif
+
+    g_engine::shaderInitFromFile(&img_shader,
+                                 "assets/img_vertex_shader.glsl", 
+                                 "assets/img_fragment_shader.glsl");
+    view_mat = glm::translate(glm::mat4(1.0f), {0.0f, 0.0f, -1.0f});
 }
 
 void app::State::run() {
-    const ImGuiStyle &imgui_style = ImGui::GetStyle();
-    window.beginFrame(window_color);
-    
     ImGui_ImplGlfw_NewFrame();
     ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
+
+    const ImGuiStyle &imgui_style = ImGui::GetStyle();
+    window.beginFrame(window_color);
+
+    if (img.m_loaded && img.m_effects.m_old_gates != img.m_effects.m_gates) {
+        img.passEffectDataGpu(img_shader);
+        img.renderToViewport(img_shader, &img_proj_mat, view_mat);
+        img.m_effects.m_old_gates = img.m_effects.m_gates;
+    }
+
+    if (img.m_loaded) {
+        img.show(imgui_style.WindowPadding);
+    }
 
     if (img_file_dialog.show_window) {
         img_file_dialog.show(&listbox_state, home_path,
                              "Select an image. The image type must be "
                              "*.jpg, *.jpeg, *.png, *.bmp or *.tga.");
-    } else if (!img_file_dialog.file_path.empty() && app::checkIfPathImage(img_file_dialog.file_path)) {
-        app::Image img;
-        
-        if (img.init(img_file_dialog.file_path.c_str(), 480)) {
-            imgs.push_back(img);
+    } else if (!img_file_dialog.file_path.empty()) {
+        if (app::checkIfPathImage(img_file_dialog.file_path)) {
+            img.init(img_file_dialog.file_path.c_str(), 480);
+        }
+        if (img.m_loaded) {
+            img.renderToViewport(img_shader, &img_proj_mat, view_mat);
         }
 
         img_file_dialog.file_path.erase();
+        img_file_dialog.crnt_dir.erase();
+        listbox_state.reset();
     }
 
-    for (app::Image &img : imgs) {
-        img.show(imgui_style.WindowPadding);
-    }
+    app::renderMainMenu(&img_file_dialog, &img, img_shader,
+                        &img_proj_mat, view_mat);
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -112,10 +130,11 @@ void app::State::run() {
 }
 
 void app::State::deinit() {
-    for (app::Image &img : imgs) {
+    if (img.m_loaded) {
         img.deinit();
     }
 
+    g_engine::shaderDeinit(img_shader);
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();

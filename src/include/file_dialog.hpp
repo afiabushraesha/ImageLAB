@@ -8,14 +8,17 @@ namespace app {
         bool selected = false;
         int selected_idx = -1;
         int old_selected_idx = 0;
+
+        void reset();
     };
 
     struct FileDialog {
         std::string file_path;
+        std::string crnt_dir;
         bool show_window = true;
 
         void show(ListBoxState *state,
-                  std::string &base_path, const char *desc);
+                  const std::string &base_path, const char *desc);
     };
 }
 

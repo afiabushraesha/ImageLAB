@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -fr build imgui.ini
+rm -fr build ./ImageLab
 
 git add .
 git commit -m "$1"
