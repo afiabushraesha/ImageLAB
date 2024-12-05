@@ -1,7 +1,7 @@
 #include "include/main_menu.hpp"
 #include "include/effect.hpp"
 #include "include/effect_windows.hpp"
-#include "include/file_dialog.hpp"
+#include "include/dialog.hpp"
 
 #include "../vendor/include/imgui/imgui.h"
 
@@ -11,7 +11,7 @@ void app::renderMainMenu(FolderContentDialog *file_dialog, Image *img,
 
     if (ImGui::BeginMenu("File")) {
         ImGui::MenuItem("Open", "CTRL+O", &file_dialog->m_show_window, !img->m_loaded);
-        ImGui::MenuItem("Export", "CTRL+E", false, img->m_loaded);
+        ImGui::MenuItem("Export", "CTRL+E", &file_dialog->m_show_window, img->m_loaded);
 
         ImGui::EndMenu();
     }

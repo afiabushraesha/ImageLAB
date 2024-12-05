@@ -20,7 +20,7 @@ cpp_include_dirs = [
 cpp_lib_dirs = ""
 cpp_libs = ["-lglfw3", "-lsoil2"]
 
-cpp_flags = []
+cpp_flags = ["-std=c++17"]
 
 if sys.platform == "win32":
     cpp_lib_dirs = "-Lvendor/mingw_w64/"

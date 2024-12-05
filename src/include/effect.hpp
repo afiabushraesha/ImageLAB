@@ -57,7 +57,23 @@ namespace app {
         bool m_windows_open[EffectIdxCount];
 
         void init();
+        void reset();
     };
+
+    void effectGrayscaleAverageFn(g_engine::vec4<unsigned char> *px);
+    void effectGrayscaleLuminFn(g_engine::vec4<unsigned char> *px);
+    void effectGrayscaleLightFn(g_engine::vec4<unsigned char> *px);
+
+    void effectBrightnessFn(g_engine::vec4<unsigned char> *px, float multiple);
+    void effectTintFn(g_engine::vec4<unsigned char> *px, g_engine::vec3<float> color);
+    void effectContrastFn(g_engine::vec4<unsigned char> *px);
+
+    void effectQuantizeFn(g_engine::vec4<unsigned char> *px);
+    void effectNoiseFn(g_engine::vec4<unsigned char> *px);
+    void effectChangeDetectFn(g_engine::vec4<unsigned char> *px);
+
+    void effectInvertFn(g_engine::vec4<unsigned char> *px);
+    void effectThresholdFn(g_engine::vec4<unsigned char> *px, unsigned int threshold);
 }
 
 #endif

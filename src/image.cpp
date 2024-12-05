@@ -1,4 +1,6 @@
 #include "include/image.hpp"
+#include "include/effect.hpp"
+#include "include/path.hpp"
 
 #include "g_engine/include/framebuffer.hpp"
 #include "g_engine/include/shader.hpp"
@@ -8,6 +10,9 @@
 #include "../vendor/include/glad/glad.h"
 #include "../vendor/include/imgui/imgui.h"
 #include "../vendor/include/SOIL2/SOIL2.h"
+
+#include <climits>
+#include <cstring>
 
 static g_engine::vec4<unsigned char> getPixel(const app::ImageData &data,
                                               const g_engine::vec2<size_t> &coord) {
@@ -93,8 +98,8 @@ void copyImageRef(app::ImageData *dest, const app::ImageData &source) {
     dest->m_pixels = source.m_pixels;
 }
 
-void app::Image::init(const char *path, int preferred_height) {
-    m_data.m_pixels = SOIL_load_image(path, &m_data.m_size.x, &m_data.m_size.y,
+void app::Image::init(const std::string &path, int preferred_height) {
+    m_data.m_pixels = SOIL_load_image(path.c_str(), &m_data.m_size.x, &m_data.m_size.y,
                                       &m_data.m_channels, SOIL_LOAD_RGBA);
     m_data.m_channels = 4;
 
@@ -107,7 +112,8 @@ void app::Image::init(const char *path, int preferred_height) {
     else
         copyImageRef(&m_low_res_data, m_data);
 
-    m_name = path;
+    pathGetLast(path, m_name);
+
     m_id = g_engine::textureInit(m_low_res_data.m_pixels,
                                  m_low_res_data.m_size,
                                  m_low_res_data.m_channels);
@@ -137,6 +143,7 @@ void app::Image::deinit() {
     g_engine::textureDeinit(&m_id);
     m_vertex_buffer.deinit();
     m_framebuffer.deinit();
+    m_loaded = false;
 }
 
 void app::Image::passEffectDataGpu(GLuint shader) {
@@ -179,13 +186,51 @@ void app::Image::show(ImVec2 window_padding) {
         (float)m_view_size.y + window_padding.y * 2
     });
 
-    ImGui::Begin(m_name.c_str(), NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+    ImGui::Begin("##image_preview", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
     ImGui::Image((intptr_t)m_framebuffer.tex_id, (ImVec2){
         (float)m_view_size.x,
         (float)m_view_size.y
     });
     ImGui::End();
 }
+
+void app::Image::applyEffects() {
+    g_engine::vec4<unsigned char> crnt_px;
+
+    for (size_t y = 0; y < m_data.m_size.y; y++) {
+        for (size_t x = 0; x < m_data.m_size.x; x++) {
+            crnt_px = getPixel(m_data, {x, y});
+
+            if ((m_effects.m_gates & 3) == app::EffectGrayscaleAverage) {
+                app::effectGrayscaleAverageFn(&crnt_px);
+            } else if ((m_effects.m_gates & 3) == app::EffectGrayscaleLumin) {
+                app::effectGrayscaleLuminFn(&crnt_px);
+            } else if ((m_effects.m_gates & 3) == app::EffectGrayscaleLight) {
+                app::effectGrayscaleLightFn(&crnt_px);
+            }
+
+            if (m_effects.m_gates & app::EffectBrightness) {
+                app::effectBrightnessFn(&crnt_px, m_effects.m_prop.m_brightness_multiple);
+            }
+            if (m_effects.m_gates & app::EffectTint) {
+                app::effectTintFn(&crnt_px, {
+                    m_effects.m_prop.m_tint_color[0],
+                    m_effects.m_prop.m_tint_color[1],
+                    m_effects.m_prop.m_tint_color[2],
+                });
+            }
+            if (m_effects.m_gates & app::EffectInvert) {
+                app::effectInvertFn(&crnt_px);
+            }
+            if (m_effects.m_gates & app::EffectThreshold) {
+                app::effectThresholdFn(&crnt_px, m_effects.m_prop.m_threshold_limit);
+            }
+
+            setPixel(&m_data, {x, y}, crnt_px);
+        }
+    }
+}
+
 
 bool app::checkIfPathImage(const std::string &s) {
     std::string type = s.substr(s.size() - 5, 5);
@@ -199,4 +244,23 @@ bool app::checkIfPathImage(const std::string &s) {
     }
 
     return false;
+}
+
+unsigned int app::imageGetSaveType(const std::string &s) {
+    std::string type = s.substr(s.size() - 5, 5);
+    if (type == ".jpeg") return SOIL_SAVE_TYPE_JPG;
+
+    type = s.substr(s.size() - 4, 4);
+
+    if (type == ".jpg") {
+        return SOIL_SAVE_TYPE_JPG;
+    } else if (type == ".png") {
+        return SOIL_SAVE_TYPE_PNG;
+    } else if (type == ".bmp") {
+        return SOIL_SAVE_TYPE_BMP;
+    } else if (type == ".tga") {
+        return SOIL_SAVE_TYPE_TGA;
+    }
+
+    return UINT_MAX;
 }

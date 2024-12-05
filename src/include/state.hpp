@@ -1,7 +1,7 @@
 #ifndef _APP_STATE_H_
 #define _APP_STATE_H_
 
-#include "file_dialog.hpp"
+#include "dialog.hpp"
 #include "image.hpp"
 
 #include "../g_engine/include/window.hpp"

@@ -15,12 +15,21 @@
 #include "../../vendor/include/glm/gtc/type_ptr.hpp"
 
 #include <string>
+#include <pthread.h>
 
 namespace app {
     struct ImageData {
         unsigned char *m_pixels;
         int m_channels;
         g_engine::vec2<int> m_size;
+    };
+
+    struct ImageThreadData {
+        // [0] is on -> thread has began.
+        // [1] is on -> thread's job is done.
+        unsigned char m_state = 0;
+        ImageData *m_data;
+        Effects *m_effects_data;
     };
 
     struct Image {
@@ -34,19 +43,22 @@ namespace app {
 
         Effects m_effects;
 
-        std::string m_name;
+        char m_name[256];
+        size_t m_name_size = sizeof(m_name);
         bool m_loaded = false;
 
-        void init(const char *path, int prefered_height);
+        void init(const std::string &path, int preferred_height);
         void deinit();
 
         void passEffectDataGpu(GLuint shader);
         void renderToViewport(GLuint shader, glm::mat4 *proj_mat, const glm::mat4 &view_mat);
+        void applyEffects();
 
         void show(ImVec2 window_padding);
     };
 
     bool checkIfPathImage(const std::string &s);
+    unsigned int imageGetSaveType(const std::string &s);
 }
 
 #endif

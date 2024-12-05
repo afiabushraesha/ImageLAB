@@ -28,12 +28,15 @@ namespace app {
         ListDirMode m_mode;
         bool m_show_window = false;
 
-        void begin(ListBoxState *state, const char *window_title,
+        bool begin(ListBoxState *state, const char *window_title,
                    const std::string &base_path, ListDirMode mode);
-        void end(ListBoxState *state);
+        void end(ListBoxState *state, bool error);
     };
 
     void dialogRenderImageImport(FolderContentDialog *dialog, ListBoxState *state,
+                                 const std::string &base_path, const char *desc);
+    void dialogRenderImageExport(FolderContentDialog *dialog, ListBoxState *state,
+                                 char *file_name_buf, size_t file_name_buf_size,
                                  const std::string &base_path, const char *desc);
 }
 
