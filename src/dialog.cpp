@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <dirent.h>
+#include <sys/stat.h>
 
 static std::vector<std::string> listDir(const char *in_dir, app::ListDirMode mode) {
     DIR *dir = NULL;
@@ -21,12 +22,6 @@ static std::vector<std::string> listDir(const char *in_dir, app::ListDirMode mod
 
     struct stat item_stat;
     std::string full_path = in_dir;
-    const char c =
-        #ifdef _WIN32
-            '\\';
-        #else
-            '/';
-        #endif
 
     while ((dir_entry = readdir(dir)) != NULL) {
         if (dir_entry->d_name[0] == '.') {
@@ -36,13 +31,15 @@ static std::vector<std::string> listDir(const char *in_dir, app::ListDirMode mod
         app::pathAppend(&full_path, dir_entry->d_name);
         stat(full_path.c_str(), &item_stat);
 
-        if ((mode == app::ListDirMode::File && (item_stat.st_mode & S_IFREG)) ||
-            (mode == app::ListDirMode::Folder && !(item_stat.st_mode & S_IFREG))) {
+        if ((mode == app::ListDirMode::File && S_ISREG(item_stat.st_mode)) ||
+            (mode == app::ListDirMode::Folder && S_ISDIR(item_stat.st_mode))) {
             out.push_back(dir_entry->d_name);
         }
         else if (mode == app::ListDirMode::FileAndFolder) {
             out.push_back(dir_entry->d_name);
         }
+
+        full_path = in_dir;
     }
 
     closedir(dir);

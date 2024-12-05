@@ -12,8 +12,6 @@
 #include "../vendor/include/imgui/imgui_impl_opengl3.h"
 #include "../vendor/include/SOIL2/SOIL2.h"
 
-#include <iostream>
-
 void app::State::init(g_engine::vec2<int> initial_size, const char *title,
                       g_engine::vec4<float> color) {
     window.init(initial_size, title);
@@ -48,6 +46,34 @@ void app::State::run() {
     const ImGuiStyle &imgui_style = ImGui::GetStyle();
     window.beginFrame(window_color);
 
+    if (img.m_loaded && !img_file_dialog.m_path.empty()) {
+        pathAppend(&img_file_dialog.m_path, img.m_name);
+        unsigned int save_type = imageGetSaveType(img_file_dialog.m_path);
+
+        if (save_type == UINT_MAX) {
+            img_file_dialog.m_path.append(".png");
+            save_type = SOIL_SAVE_TYPE_PNG;
+        }
+
+        ImGui::Begin("Saving");
+        ImGui::TextWrapped("Your image is being saved at: `%s`",
+                           img_file_dialog.m_path.c_str());
+        ImGui::End();
+
+        img.applyEffects();
+
+        SOIL_save_image(img_file_dialog.m_path.c_str(), save_type,
+                        img.m_data.m_size.x, img.m_data.m_size.y,
+                        img.m_data.m_channels, img.m_data.m_pixels);
+
+        img.m_effects.reset();
+        img.m_effects.init();
+
+        img.deinit();
+        img_file_dialog.m_path.erase();
+        img_file_dialog.m_crnt_dir.erase();
+    }
+
     if (img.m_loaded && img.m_effects.m_old_gates != img.m_effects.m_gates) {
         img.passEffectDataGpu(img_shader);
         img.renderToViewport(img_shader, &img_proj_mat, view_mat);
@@ -79,35 +105,6 @@ void app::State::run() {
         dialogRenderImageExport(&img_file_dialog, &listbox_state, img.m_name, img.m_name_size, home_path,
                                 "Select a folder to save the image. You can change the name of"
                                 "of the file in `File Name`");
-    }
-
-    std::cout << img_file_dialog.m_path << img.m_name << std::endl;
-    if (img.m_loaded && !img_file_dialog.m_path.empty()) {
-        pathAppend(&img_file_dialog.m_path, img.m_name);
-        unsigned int save_type = imageGetSaveType(img_file_dialog.m_path);
-
-        if (save_type == UINT_MAX) {
-            img_file_dialog.m_path.append(".png");
-            save_type = SOIL_SAVE_TYPE_PNG;
-        }
-
-        ImGui::Begin("Saving");
-        ImGui::TextWrapped("Your image is being saved at: `%s`",
-                           img_file_dialog.m_path.c_str());
-        ImGui::End();
-
-        img.applyEffects();
-
-        SOIL_save_image(img_file_dialog.m_path.c_str(), save_type,
-                        img.m_data.m_size.x, img.m_data.m_size.y,
-                        img.m_data.m_channels, img.m_data.m_pixels);
-
-        img.m_effects.reset();
-        img.m_effects.init();
-
-        img.deinit();
-        img_file_dialog.m_path.erase();
-        img_file_dialog.m_crnt_dir.erase();
     }
 
     app::renderMainMenu(&img_file_dialog, &img, img_shader,

@@ -112,6 +112,7 @@ void app::Image::init(const std::string &path, int preferred_height) {
     else
         copyImageRef(&m_low_res_data, m_data);
 
+    memset(m_name, '\0', m_name_size);
     pathGetLast(path, m_name);
 
     m_id = g_engine::textureInit(m_low_res_data.m_pixels,
