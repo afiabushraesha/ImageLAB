@@ -184,11 +184,6 @@ void app::Image::renderToViewport(GLuint shader, glm::mat4 *proj_mat, const glm:
 }
 
 void app::Image::show(ImVec2 window_padding) {
-    //ImGui::SetNextWindowSize({
-    //    (float)m_view_size.x + window_padding.x * 16,
-    //    (float)m_view_size.y + window_padding.y * 16
-    //});
-
     ImGui::Begin("Edited Image");
 
     ImVec2 size = ImGui::GetContentRegionAvail();
