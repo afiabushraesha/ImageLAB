@@ -36,6 +36,7 @@ namespace app {
         ImageData m_data;
         ImageData m_low_res_data;
         g_engine::vec2<int> m_view_size;
+        float m_aspect_ratio;
 
         GLuint m_id;
         g_engine::Buffer m_vertex_buffer;

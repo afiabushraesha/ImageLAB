@@ -9,10 +9,12 @@
  
 #include "../vendor/include/glad/glad.h"
 #include "../vendor/include/imgui/imgui.h"
+#include "../vendor/include/imgui/imgui_internal.h"
 #include "../vendor/include/SOIL2/SOIL2.h"
 
 #include <climits>
 #include <cstring>
+#include <iostream>
 
 static g_engine::vec4<unsigned char> getPixel(const app::ImageData &data,
                                               const g_engine::vec2<size_t> &coord) {
@@ -103,8 +105,8 @@ void app::Image::init(const std::string &path, int preferred_height) {
                                       &m_data.m_channels, SOIL_LOAD_RGBA);
     m_data.m_channels = 4;
 
-    float aspect = (float)m_data.m_size.x / (float)m_data.m_size.y;
-    m_view_size.x = aspect * preferred_height;
+    m_aspect_ratio = (float)m_data.m_size.x / (float)m_data.m_size.y;
+    m_view_size.x = m_aspect_ratio * preferred_height;
     m_view_size.y = preferred_height;
 
     if (m_data.m_size.x >= (1 << 11) || m_data.m_size.y >= (1 << 11))
@@ -182,16 +184,34 @@ void app::Image::renderToViewport(GLuint shader, glm::mat4 *proj_mat, const glm:
 }
 
 void app::Image::show(ImVec2 window_padding) {
-    ImGui::SetNextWindowSize({
-        (float)m_view_size.x + window_padding.x * 2,
-        (float)m_view_size.y + window_padding.y * 2
+    //ImGui::SetNextWindowSize({
+    //    (float)m_view_size.x + window_padding.x * 16,
+    //    (float)m_view_size.y + window_padding.y * 16
+    //});
+
+    ImGui::Begin("Edited Image");
+
+    ImVec2 size = ImGui::GetContentRegionAvail();
+    ImVec2 cursor_pos = ImGui::GetCursorPos();
+    
+    if (size.x / size.y > m_aspect_ratio) {
+        m_view_size.y = size.y;
+        m_view_size.x = m_aspect_ratio * m_view_size.y;
+    } else {
+        m_view_size.x = size.x;
+        m_view_size.y = m_view_size.x / m_aspect_ratio;
+    }
+
+    ImGui::SetCursorPos({
+        cursor_pos.x + (size.x - m_view_size.x) * 0.5f,
+        cursor_pos.y + (size.y - m_view_size.y) * 0.5f,
     });
 
-    ImGui::Begin("##image_preview", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
     ImGui::Image((intptr_t)m_framebuffer.tex_id, (ImVec2){
         (float)m_view_size.x,
         (float)m_view_size.y
     });
+
     ImGui::End();
 }
 

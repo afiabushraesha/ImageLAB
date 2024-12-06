@@ -13,6 +13,7 @@ static ImVec4 hexToNormalizedRgb(unsigned int hex) {
 
 void app::styleApply() {
     ImGuiStyle &style = ImGui::GetStyle();
+
     style.WindowRounding = 0.0f;
     style.FrameRounding = 0.0f;
     style.ScrollbarRounding = 0.0f;
