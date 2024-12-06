@@ -38,6 +38,9 @@ namespace app {
         g_engine::vec2<int> m_view_size;
         float m_aspect_ratio;
 
+        g_engine::vec3<unsigned char> m_max_intensity = {0, 0, 0};
+        g_engine::vec3<unsigned char> m_min_intensity = {255, 255, 255};
+
         GLuint m_id;
         g_engine::Buffer m_vertex_buffer;
         g_engine::FrameBuffer m_framebuffer;

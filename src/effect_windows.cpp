@@ -6,7 +6,14 @@
 void app::showGrayscaleWindow(Image *img) {
     bool *is_open = &img->m_effects.m_windows_open[EffectIdxGrayscale];
 
-    if ((!*is_open) || (!ImGui::Begin("Grayscale", is_open))) return;
+    if (!*is_open) {
+        return;
+    }
+
+    if ((!ImGui::Begin("Threshold", is_open))) {
+        ImGui::End();
+        return;
+    }
 
     ImGui::RadioButton("Average", &img->m_effects.m_prop.m_ui_info.m_grayscale_idx, EffectGrayscaleAverage);
     ImGui::RadioButton("Lumin", &img->m_effects.m_prop.m_ui_info.m_grayscale_idx, EffectGrayscaleLumin);
@@ -38,7 +45,14 @@ void app::showBrightnessWindow(Image *img, unsigned int shader,
                                glm::mat4 *proj_mat, const glm::mat4 &view_mat) {
     bool *is_open = &img->m_effects.m_windows_open[EffectIdxBrightness];
 
-    if ((!*is_open) || (!ImGui::Begin("Brightness", is_open))) return;
+    if (!*is_open) {
+        return;
+    }
+
+    if ((!ImGui::Begin("Threshold", is_open))) {
+        ImGui::End();
+        return;
+    }
 
     if (ImGui::SliderFloat("multiple",
                            &img->m_effects.m_prop.m_brightness_multiple, 0.0f, 3.0f)) {
@@ -68,7 +82,14 @@ void app::showTintWindow(Image *img, unsigned int shader,
                          glm::mat4 *proj_mat, const glm::mat4 &view_mat) {
     bool *is_open = &img->m_effects.m_windows_open[EffectIdxTint];
 
-    if ((!*is_open) || (!ImGui::Begin("Tint", is_open))) return;
+    if (!*is_open) {
+        return;
+    }
+
+    if ((!ImGui::Begin("Tint", is_open))) {
+        ImGui::End();
+        return;
+    }
 
     if (ImGui::SliderFloat("R", &img->m_effects.m_prop.m_tint_color[0], 0.0f, 3.0f)) {
         img->passEffectDataGpu(shader);
@@ -101,41 +122,18 @@ void app::showTintWindow(Image *img, unsigned int shader,
     ImGui::End();
 }
 
-void app::showInvertWindow(Image *img) {
-    bool *is_open = &img->m_effects.m_windows_open[EffectIdxInvert];
-
-    if ((!*is_open) || (!ImGui::Begin("Invert", is_open))) return;
-
-    ImGui::Checkbox("Enable", &img->m_effects.m_prop.m_is_inverted);
-    ImGui::TextWrapped("Inverts the color of the pixel. Meaning, the "
-                       "RGB color of a pixel if the opposite of itself.");
-
-    if (img->m_effects.m_prop.m_is_inverted == true) {
-        img->m_effects.m_gates |= EffectInvert;
-    }
-    else {
-        img->m_effects.m_gates &= ~EffectInvert;
-    }
-
-    if (ImGui::Button("Ok")) {
-        *is_open = false;
-    }
-
-    ImGui::SameLine();
-
-    if (ImGui::Button("Cancel")) {
-        img->m_effects.m_gates &= ~EffectInvert;
-        *is_open = false;
-    }
-
-    ImGui::End();
-}
-
 void app::showThresholdWindow(Image *img, unsigned int shader,
                               glm::mat4 *proj_mat, const glm::mat4 &view_mat) {
     bool *is_open = &img->m_effects.m_windows_open[EffectIdxThreshold];
 
-    if ((!*is_open) || (!ImGui::Begin("Threshold", is_open))) return;
+    if (!*is_open) {
+        return;
+    }
+
+    if ((!ImGui::Begin("Threshold", is_open))) {
+        ImGui::End();
+        return;
+    }
 
     if (ImGui::SliderInt("Limit", &img->m_effects.m_prop.m_threshold_limit, 0, 255)) {
         img->passEffectDataGpu(shader);

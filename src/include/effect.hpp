@@ -66,7 +66,9 @@ namespace app {
 
     void effectBrightnessFn(g_engine::vec4<unsigned char> *px, float multiple);
     void effectTintFn(g_engine::vec4<unsigned char> *px, g_engine::vec3<float> color);
-    void effectContrastFn(g_engine::vec4<unsigned char> *px);
+    void effectContrastFn(g_engine::vec4<unsigned char> *px,
+                          g_engine::vec3<unsigned char> min_intensity,
+                          g_engine::vec3<unsigned char> max_intensity);
 
     void effectQuantizeFn(g_engine::vec4<unsigned char> *px);
     void effectNoiseFn(g_engine::vec4<unsigned char> *px);

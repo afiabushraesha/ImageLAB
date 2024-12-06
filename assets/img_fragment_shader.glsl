@@ -24,6 +24,8 @@ uniform float brightness_multiple;
 uniform float noise_intensity;
 uniform float contrast_intensity;
 uniform uint threshold_limit;
+uniform uvec3 max_intensity;
+uniform uvec3 min_intensity;
 
 vec4 grayscaleAverage(vec4 px) {
     float y = (px.r + px.g + px.b) / 3.0f;
@@ -58,6 +60,15 @@ vec4 threshold(vec4 px, float limit) {
     else return vec4(vec3(0.0f), 1.0f);
 }
 
+vec4 contrast(vec4 px) {
+    return vec4(
+        ((px.r * 255) - min_intensity.r) / (max_intensity.r - min_intensity.r),
+        ((px.g * 255) - min_intensity.g) / (max_intensity.g - min_intensity.g),
+        ((px.b * 255) - min_intensity.b) / (max_intensity.b - min_intensity.b),
+        px.a
+    );
+}
+
 void main() {
     vec4 pixel_color = texture(image_texture, v_texture_coords);
 
@@ -80,6 +91,9 @@ void main() {
     }
     if ((effect_gates & EffectThreshold) == EffectThreshold) {
         pixel_color = threshold(pixel_color, threshold_limit / 255.0f);
+    }
+    if ((effect_gates & EffectContrast) == EffectContrast) {
+        pixel_color = contrast(pixel_color);
     }
 
     out_color = pixel_color;

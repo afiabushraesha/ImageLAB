@@ -2,7 +2,7 @@
 
 int main() {
     app::State state;
-    state.init({640, 360}, "ImageLAB", {
+    state.init({1280, 720}, "ImageLAB", {
         17  / 255.0f,
         17  / 255.0f,
         27  / 255.0f,

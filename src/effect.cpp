@@ -44,14 +44,18 @@ void app::effectBrightnessFn(g_engine::vec4<unsigned char> *px, float multiple) 
 }
 
 void app::effectTintFn(g_engine::vec4<unsigned char> *px, g_engine::vec3<float> color) {
-        px->x = (unsigned char)std::clamp((int)(px->x * color.x), 0, 255);
-        px->y = (unsigned char)std::clamp((int)(px->y * color.y), 0, 255);
-        px->z = (unsigned char)std::clamp((int)(px->z * color.z), 0, 255);
+    px->x = (unsigned char)std::clamp((int)(px->x * color.x), 0, 255);
+    px->y = (unsigned char)std::clamp((int)(px->y * color.y), 0, 255);
+    px->z = (unsigned char)std::clamp((int)(px->z * color.z), 0, 255);
 }
 
-//void app::effectContrastFn(g_engine::vec4<unsigned char> px) {
-//
-//}
+void app::effectContrastFn(g_engine::vec4<unsigned char> *px,
+                           g_engine::vec3<unsigned char> min_intensity,
+                           g_engine::vec3<unsigned char> max_intensity) {
+    px->x = ((float)(px->x - min_intensity.x) / (float)(max_intensity.x - min_intensity.x)) * 255;
+    px->y = ((float)(px->y - min_intensity.y) / (float)(max_intensity.y - min_intensity.y)) * 255;
+    px->z = ((float)(px->z - min_intensity.z) / (float)(max_intensity.z - min_intensity.z)) * 255;
+}
 //
 //void app::effectQuantizeFn(g_engine::vec4<unsigned char> px) {
 //

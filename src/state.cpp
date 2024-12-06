@@ -36,6 +36,8 @@ void app::State::init(g_engine::vec2<int> initial_size, const char *title,
                                  "assets/img_vertex_shader.glsl", 
                                  "assets/img_fragment_shader.glsl");
     view_mat = glm::translate(glm::mat4(1.0f), {0.0f, 0.0f, -1.0f});
+
+    img.m_effects.init();
 }
 
 void app::State::run() {

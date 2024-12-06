@@ -9,7 +9,8 @@ Currently the following features are noted in the roadmap for ImageLAB.
 - [x] Brightness
 - [x] Tint
 - [x] Invert
-- [ ] Contrast
+- [x] Threshold
+- [x] Contrast
 - [ ] Crop
 - [ ] Filters on Crop
 - [ ] Edge Detection (Sobel)

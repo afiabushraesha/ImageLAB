@@ -9,7 +9,6 @@ namespace app {
                               glm::mat4 *proj_mat, const glm::mat4 &view_mat);
     void showTintWindow(Image *img, unsigned int shader,
                         glm::mat4 *proj_mat, const glm::mat4 &view_mat);
-    void showInvertWindow(Image *img);
     void showThresholdWindow(Image *img, unsigned int shader,
                              glm::mat4 *proj_mat, const glm::mat4 &view_mat);
 }

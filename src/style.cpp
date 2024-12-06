@@ -12,6 +12,9 @@ static ImVec4 hexToNormalizedRgb(unsigned int hex) {
 }
 
 void app::styleApply() {
+    ImGuiIO &io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
     ImGuiStyle &style = ImGui::GetStyle();
 
     style.WindowRounding = 0.0f;
@@ -46,7 +49,7 @@ void app::styleApply() {
     style.Colors[ImGuiCol_Button] =                     hexToNormalizedRgb(0x1e1e2eff);
     style.Colors[ImGuiCol_ButtonHovered] =              hexToNormalizedRgb(0x313244ff);
     style.Colors[ImGuiCol_ButtonActive] =               hexToNormalizedRgb(0x6c7086ff);
-    style.Colors[ImGuiCol_Header] =                     hexToNormalizedRgb(0x181825ff);
+    style.Colors[ImGuiCol_Header] =                     hexToNormalizedRgb(0x313244ff);
     style.Colors[ImGuiCol_HeaderHovered] =              hexToNormalizedRgb(0x313244ff);
     style.Colors[ImGuiCol_HeaderActive] =               hexToNormalizedRgb(0x6c7086ff);
     style.Colors[ImGuiCol_Separator] =                  hexToNormalizedRgb(0x1e1e2eff);
@@ -72,7 +75,7 @@ void app::styleApply() {
     style.Colors[ImGuiCol_TableRowBg] =                 hexToNormalizedRgb(0x89dcebff);
     style.Colors[ImGuiCol_TableRowBgAlt] =              hexToNormalizedRgb(0x94e2d5ff);
     style.Colors[ImGuiCol_TextLink] =                   hexToNormalizedRgb(0x89dcebff);
-    style.Colors[ImGuiCol_TextSelectedBg] =             hexToNormalizedRgb(0x94e2d5ff);
+    style.Colors[ImGuiCol_TextSelectedBg] =             hexToNormalizedRgb(0x313244ff);
     style.Colors[ImGuiCol_DragDropTarget] =             hexToNormalizedRgb(0x89dcebff);
     style.Colors[ImGuiCol_NavCursor] =                  hexToNormalizedRgb(0x1e1e2eff);
     style.Colors[ImGuiCol_NavWindowingHighlight] =      hexToNormalizedRgb(0x313244ff);

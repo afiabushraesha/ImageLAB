@@ -137,6 +137,18 @@ void app::Image::init(const std::string &path, int preferred_height) {
     m_framebuffer.init(m_data.m_size);
     m_effects.init();
     m_loaded = true;
+
+    for (size_t i = 0;
+        i < m_data.m_size.x * m_data.m_size.y * m_data.m_channels;
+        i += m_data.m_channels) {
+        m_max_intensity.x = std::max(m_max_intensity.x, m_data.m_pixels[i + 0]);
+        m_max_intensity.y = std::max(m_max_intensity.y, m_data.m_pixels[i + 1]);
+        m_max_intensity.z = std::max(m_max_intensity.z, m_data.m_pixels[i + 2]);
+
+        m_min_intensity.x = std::min(m_min_intensity.x, m_data.m_pixels[i + 0]);
+        m_min_intensity.y = std::min(m_min_intensity.y, m_data.m_pixels[i + 1]);
+        m_min_intensity.z = std::min(m_min_intensity.z, m_data.m_pixels[i + 2]);
+    }
 }
 
 void app::Image::deinit() {
@@ -162,6 +174,10 @@ void app::Image::passEffectDataGpu(GLuint shader) {
                 m_effects.m_prop.m_contrast_intensity);
     glUniform1ui(glGetUniformLocation(shader, "threshold_limit"),
                 m_effects.m_prop.m_threshold_limit);
+    glUniform3ui(glGetUniformLocation(shader, "max_intensity"),
+                m_max_intensity.x, m_max_intensity.y, m_max_intensity.z);
+    glUniform3ui(glGetUniformLocation(shader, "min_intensity"),
+                m_min_intensity.x, m_min_intensity.y, m_min_intensity.z);
 }
 
 void app::Image::renderToViewport(GLuint shader, glm::mat4 *proj_mat, const glm::mat4 &view_mat) {
@@ -263,6 +279,9 @@ void app::Image::applyEffects() {
             }
             if (m_effects.m_gates & app::EffectThreshold) {
                 app::effectThresholdFn(&crnt_px, m_effects.m_prop.m_threshold_limit);
+            }
+            if (m_effects.m_gates & app::EffectContrast) {
+                app::effectContrastFn(&crnt_px, m_min_intensity, m_max_intensity);
             }
 
             setPixel(&m_data, {x, y}, crnt_px);
