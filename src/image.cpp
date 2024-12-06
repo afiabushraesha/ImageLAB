@@ -9,12 +9,10 @@
  
 #include "../vendor/include/glad/glad.h"
 #include "../vendor/include/imgui/imgui.h"
-#include "../vendor/include/imgui/imgui_internal.h"
 #include "../vendor/include/SOIL2/SOIL2.h"
 
 #include <climits>
 #include <cstring>
-#include <iostream>
 
 static g_engine::vec4<unsigned char> getPixel(const app::ImageData &data,
                                               const g_engine::vec2<size_t> &coord) {
@@ -162,7 +160,7 @@ void app::Image::passEffectDataGpu(GLuint shader) {
                 m_effects.m_prop.m_noise_intensity);
     glUniform1f(glGetUniformLocation(shader, "contrast_intensity"),
                 m_effects.m_prop.m_contrast_intensity);
-    glUniform1i(glGetUniformLocation(shader, "threshold_limit"),
+    glUniform1ui(glGetUniformLocation(shader, "threshold_limit"),
                 m_effects.m_prop.m_threshold_limit);
 }
 
@@ -203,6 +201,31 @@ void app::Image::show(ImVec2 window_padding) {
     });
 
     ImGui::Image((intptr_t)m_framebuffer.tex_id, (ImVec2){
+        (float)m_view_size.x,
+        (float)m_view_size.y
+    });
+
+    ImGui::End();
+
+    ImGui::Begin("Original Image");
+
+    size = ImGui::GetContentRegionAvail();
+    cursor_pos = ImGui::GetCursorPos();
+    
+    if (size.x / size.y > m_aspect_ratio) {
+        m_view_size.y = size.y;
+        m_view_size.x = m_aspect_ratio * m_view_size.y;
+    } else {
+        m_view_size.x = size.x;
+        m_view_size.y = m_view_size.x / m_aspect_ratio;
+    }
+
+    ImGui::SetCursorPos({
+        cursor_pos.x + (size.x - m_view_size.x) * 0.5f,
+        cursor_pos.y + (size.y - m_view_size.y) * 0.5f,
+    });
+
+    ImGui::Image((intptr_t)m_id, (ImVec2){
         (float)m_view_size.x,
         (float)m_view_size.y
     });

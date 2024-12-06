@@ -47,7 +47,7 @@ namespace app {
         float m_noise_intensity = 0.5f;
         float m_contrast_intensity = 1.0f;
         bool m_is_inverted = false;
-        unsigned char m_threshold_limit = 127;
+        int m_threshold_limit = 127;
     };
 
     struct Effects {

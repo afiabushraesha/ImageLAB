@@ -23,7 +23,7 @@ uniform vec3 tint_color;
 uniform float brightness_multiple;
 uniform float noise_intensity;
 uniform float contrast_intensity;
-uniform int threshold_limit;
+uniform uint threshold_limit;
 
 vec4 grayscaleAverage(vec4 px) {
     float y = (px.r + px.g + px.b) / 3.0f;

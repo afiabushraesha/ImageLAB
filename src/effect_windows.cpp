@@ -137,7 +137,7 @@ void app::showThresholdWindow(Image *img, unsigned int shader,
 
     if ((!*is_open) || (!ImGui::Begin("Threshold", is_open))) return;
 
-    if (ImGui::SliderInt("Limit", (int *)&img->m_effects.m_prop.m_threshold_limit, 0, 255)) {
+    if (ImGui::SliderInt("Limit", &img->m_effects.m_prop.m_threshold_limit, 0, 255)) {
         img->passEffectDataGpu(shader);
         img->renderToViewport(shader, proj_mat, view_mat);
     }
