@@ -1,4 +1,4 @@
-#include "include/style.hpp"
+#include "include/config.hpp"
 
 #include "../vendor/include/imgui/imgui.h"
 
@@ -11,19 +11,24 @@ static ImVec4 hexToNormalizedRgb(unsigned int hex) {
     );
 }
 
-void app::styleApply() {
+void app::configInit() {
     ImGuiIO &io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    //io.IniFilename = NULL;
+    io.Fonts->AddFontFromFileTTF("assets/roboto_mono_medium.ttf", 20.0f);
+
+    //ImGui::LoadIniSettingsFromDisk("assets/imgui_const_config.ini");
+    //ImGui::SaveIniSettingsToDisk("assets/imgui_const_config.ini");
 
     ImGuiStyle &style = ImGui::GetStyle();
 
-    style.WindowRounding = 0.0f;
-    style.FrameRounding = 0.0f;
-    style.ScrollbarRounding = 0.0f;
-    style.TabRounding = 0.0f;
-    style.GrabRounding = 0.0f;
-    style.ChildRounding = 0.0f;
-    style.PopupRounding = 0.0f;
+    style.WindowRounding        = 0.0f;
+    style.FrameRounding         = 0.0f;
+    style.ScrollbarRounding     = 0.0f;
+    style.TabRounding           = 0.0f;
+    style.GrabRounding          = 0.0f;
+    style.ChildRounding         = 0.0f;
+    style.PopupRounding         = 0.0f;
 
     style.Colors[ImGuiCol_Text] =                       hexToNormalizedRgb(0xcdd6f4ff);
     style.Colors[ImGuiCol_TextDisabled] =               hexToNormalizedRgb(0xbac2deff);
@@ -60,7 +65,7 @@ void app::styleApply() {
     style.Colors[ImGuiCol_ResizeGripActive] =           hexToNormalizedRgb(0x94e2d5ff);
     style.Colors[ImGuiCol_Tab] =                        hexToNormalizedRgb(0x1e1e2eff);
     style.Colors[ImGuiCol_TabHovered] =                 hexToNormalizedRgb(0x313244ff);
-    style.Colors[ImGuiCol_TabSelected] =                hexToNormalizedRgb(0x89dcebff);
+    style.Colors[ImGuiCol_TabSelected] =                hexToNormalizedRgb(0x313244ff);
     style.Colors[ImGuiCol_TabSelectedOverline] =        hexToNormalizedRgb(0x313244ff);
     style.Colors[ImGuiCol_TabDimmed] =                  hexToNormalizedRgb(0x181825ff);
     style.Colors[ImGuiCol_TabDimmedSelected] =          hexToNormalizedRgb(0x1e1e2eff);

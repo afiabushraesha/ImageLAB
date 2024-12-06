@@ -61,12 +61,12 @@ def genObj(compiler, cpp_file_path, store_dir):
 
 def genBin(compiler, obj_files, bin_path, include_dirs, lib_dirs, libs, flags):
     run_command = [compiler]
+    run_command.extend(flags)
     run_command.extend(obj_files)
     run_command.extend(["-o", bin_path])
     run_command.extend(include_dirs)
     run_command.extend([lib_dirs])
     run_command.extend(libs)
-    run_command.extend(flags)
 
     print(run_command)
 

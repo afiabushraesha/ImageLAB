@@ -2,7 +2,7 @@
 #include "include/dialog.hpp"
 #include "include/image.hpp"
 #include "include/main_menu.hpp"
-#include "include/style.hpp"
+#include "include/config.hpp"
 #include "include/path.hpp"
 
 #include "g_engine/include/shader.hpp"
@@ -21,10 +21,7 @@ void app::State::init(g_engine::vec2<int> initial_size, const char *title,
     ImGui_ImplGlfw_InitForOpenGL(window.m_window, true);
     ImGui_ImplOpenGL3_Init();
 
-    ImGuiIO &imgui_io = ImGui::GetIO();
-    imgui_io.Fonts->AddFontFromFileTTF("assets/roboto_mono_medium.ttf", 20.0f);
-
-    styleApply();
+    configInit();
     
     #ifdef _WIN32
         home_path = std::getenv("USERPROFILE"); 

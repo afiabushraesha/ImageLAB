@@ -10,7 +10,7 @@ void app::showGrayscaleWindow(Image *img) {
         return;
     }
 
-    if ((!ImGui::Begin("Threshold", is_open))) {
+    if ((!ImGui::Begin("Grayscale", is_open))) {
         ImGui::End();
         return;
     }
@@ -49,7 +49,7 @@ void app::showBrightnessWindow(Image *img, unsigned int shader,
         return;
     }
 
-    if ((!ImGui::Begin("Threshold", is_open))) {
+    if ((!ImGui::Begin("Brightness", is_open))) {
         ImGui::End();
         return;
     }
@@ -139,7 +139,7 @@ void app::showThresholdWindow(Image *img, unsigned int shader,
         img->passEffectDataGpu(shader);
         img->renderToViewport(shader, proj_mat, view_mat);
     }
-    ImGui::TextWrapped("Clamps pixel's value to the maximum of RGB(255) if"
+    ImGui::TextWrapped("Clamps pixel's value to the maximum of RGB(255) if "
                        "it's above Limit, otherwise it's set to 0.");
 
     img->m_effects.m_gates |= EffectThreshold;

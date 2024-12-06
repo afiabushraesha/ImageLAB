@@ -56,7 +56,7 @@ vec4 invert(vec4 px) {
 
 vec4 threshold(vec4 px, float limit) {
     vec4 _px = grayscaleLumin(px);
-    if (_px.r > limit) return vec4(1.0f);
+    if (_px.r >= limit) return vec4(1.0f);
     else return vec4(vec3(0.0f), 1.0f);
 }
 
