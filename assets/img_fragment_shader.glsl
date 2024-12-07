@@ -27,8 +27,8 @@ uniform uint threshold_limit;
 uniform uvec3 max_intensity;
 uniform uvec3 min_intensity;
 
-float random(vec2 p) {
-    return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+float imgRandom(vec2 st) {
+    return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
 }
 
 vec4 imgGrayscaleAverage(vec4 px) {
@@ -75,8 +75,8 @@ vec4 imgContrast(vec4 px) {
 
 vec4 imgNoise(vec4 px) {
     vec3 _px = px.rgb;
-    float noise_value = random(v_texture_coords * 10.0);
-    _px.rgb += noise_intensity * (noise_value - 0.5);
+    float noise_value = imgRandom(v_texture_coords) * 10.0f;
+    _px.rgb += noise_intensity * (noise_value - 0.5) * 0.1f;
     return vec4(_px, px.a);
 }
 

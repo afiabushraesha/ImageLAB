@@ -1,4 +1,5 @@
 #include "include/effect.hpp"
+#include "include/math.hpp"
 
 #include <cstring>
 #include <algorithm>
@@ -61,9 +62,31 @@ void app::effectContrastFn(g_engine::vec4<unsigned char> *px,
 //
 //}
 //
-//void app::effectNoiseFn(g_engine::vec4<unsigned char> px) {
-//
-//}
+void app::effectNoiseFn(g_engine::vec4<unsigned char> *px, g_engine::vec2<int> px_coords,
+                        g_engine::vec2<int> image_size, float intensity) {
+    float noise_value = mathRandom({
+        (float)px_coords.x / image_size.x,
+        (float)px_coords.y / image_size.y
+    }) * 10.0f;
+
+    px->x =
+        (unsigned char)std::clamp(
+            (float)px->x + intensity * (noise_value - 0.5f) * 0.1f * 255.0f,
+            0.0f, 255.0f
+        );
+    px->y =
+        (unsigned char)std::clamp(
+            (float)px->y + intensity * (noise_value - 0.5f) * 0.1f * 255.0f,
+            0.0f, 255.0f
+        );
+    px->z =
+        (unsigned char)std::clamp(
+            (float)px->z + intensity * (noise_value - 0.5f) * 0.1f * 255.0f,
+            0.0f, 255.0f
+        );
+
+
+}
 //
 //void app::effectChangeDetectFn(g_engine::vec4<unsigned char> px) {
 //

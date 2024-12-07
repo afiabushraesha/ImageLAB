@@ -321,6 +321,10 @@ void app::Image::applyEffects() {
             if (m_effects.m_gates & app::EffectContrast) {
                 app::effectContrastFn(&crnt_px, m_min_intensity, m_max_intensity);
             }
+            if (m_effects.m_gates & app::EffectNoise) {
+                app::effectNoiseFn(&crnt_px, {(int)x, (int)y},
+                                   m_data.m_size, m_effects.m_prop.m_noise_intensity);
+            }
             if (m_effects.m_gates & app::EffectStegnographyEncode) {
                 if (x == 0 && y == 0) {
                     crnt_px.x &= ~(unsigned char)3;

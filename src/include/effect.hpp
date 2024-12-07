@@ -74,7 +74,8 @@ namespace app {
                           g_engine::vec3<unsigned char> max_intensity);
 
     void effectQuantizeFn(g_engine::vec4<unsigned char> *px);
-    void effectNoiseFn(g_engine::vec4<unsigned char> *px);
+    void effectNoiseFn(g_engine::vec4<unsigned char> *px, g_engine::vec2<int> px_coords,
+                       g_engine::vec2<int> image_size, float intensity);
     void effectChangeDetectFn(g_engine::vec4<unsigned char> *px);
 
     void effectInvertFn(g_engine::vec4<unsigned char> *px);

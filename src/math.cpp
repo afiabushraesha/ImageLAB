@@ -1,5 +1,9 @@
 #include "include/math.hpp"
 
+#include "../vendor/include/glm/glm.hpp"
+
+#include <cmath>
+
 unsigned char app::mathStegnoEncodeChar(char c) {
     if (c >= 'A' && c <= 'Z') {
         return c - 'A';
@@ -38,4 +42,13 @@ char app::mathStegnoDecodeChar(unsigned char c) {
     }
 
     return '\0';
+}
+
+float app::mathRandom(g_engine::vec2<float> seed) {
+    return glm::fract(
+        sin(
+            glm::dot((glm::vec2){seed.x, seed.y},
+                     {12.9898, 78.233})
+        ) * 43758.5453123
+    );
 }
