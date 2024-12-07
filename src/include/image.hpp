@@ -50,6 +50,8 @@ namespace app {
         char m_name[256];
         size_t m_name_size = sizeof(m_name);
         bool m_loaded = false;
+        char m_stegnography_encode_buf[1024 * 2];
+        std::string m_stegnography_decode_buf;
 
         void init(const std::string &path, int preferred_height);
         void deinit();

@@ -7,7 +7,6 @@
 
 namespace app {
     const size_t EffectCount = 11;
-    const size_t EffectIdxCount = EffectCount - 2;
 
     enum EffectType : unsigned int {
         EffectGrayscaleAverage = 1,
@@ -21,6 +20,7 @@ namespace app {
         EffectChangeDetect = 1 << 7,
         EffectInvert = 1 << 8,
         EffectThreshold = 1 << 9,
+        EffectStegnographyEncode = 1 << 30,
     };
 
     enum EffectWindowIdx {
@@ -33,6 +33,9 @@ namespace app {
         EffectIdxChangeDetect,
         EffectIdxInvert,
         EffectIdxThreshold,
+        EffectIdxStegnographyEncode,
+        EffectIdxStegnographyDecode,
+        EffectIdxCount,
     };
 
     // TODO: No need for this struct.

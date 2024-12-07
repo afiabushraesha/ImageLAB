@@ -157,3 +157,100 @@ void app::showThresholdWindow(Image *img, unsigned int shader,
 
     ImGui::End();
 }
+
+void app::showNoiseWindow(Image *img, unsigned int shader,
+                          glm::mat4 *proj_mat, const glm::mat4 &view_mat) {
+    bool *is_open = &img->m_effects.m_windows_open[EffectIdxNoise];
+
+    if (!*is_open) {
+        return;
+    }
+
+    if ((!ImGui::Begin("Noise", is_open))) {
+        ImGui::End();
+        return;
+    }
+
+    if (ImGui::SliderFloat("Intensity", &img->m_effects.m_prop.m_noise_intensity, 0, 1.0f)) {
+        img->passEffectDataGpu(shader);
+        img->renderToViewport(shader, proj_mat, view_mat);
+    }
+
+    ImGui::TextWrapped("Adds a noise filter on top of the image based on random numbers!");
+    img->m_effects.m_gates |= EffectNoise;
+
+    if (ImGui::Button("Ok")) {
+        *is_open = false;
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Cancel")) {
+        img->m_effects.m_gates &= ~EffectNoise;
+        *is_open = false;
+    }
+
+    ImGui::End();
+}
+
+void app::showStegnographyEncodeWindow(Image *img) {
+    bool *is_open = &img->m_effects.m_windows_open[EffectIdxStegnographyEncode];
+
+    if (!*is_open) {
+        return;
+    }
+
+    if ((!ImGui::Begin("Encode Message", is_open))) {
+        ImGui::End();
+        return;
+    }
+
+    ImGui::TextWrapped("The message can only contain A-Z, a-z, 0-9 & ' '"
+                       "(without quotes).\n\nWrite your message below:");
+
+    ImGui::InputText("##input_text_1", img->m_stegnography_encode_buf,
+                     IM_ARRAYSIZE(img->m_stegnography_encode_buf));
+
+    ImGui::TextWrapped("Hides message in the 6 bits of RGB channels. "
+                       "When stegnography is applied only, png, bmp & tga "
+                       "file types are supported. The message cannot "
+                       "be decoded until it's exported.\n\n"
+                       "WARNING: Message will get currrupted if saved in the JPEG "
+                       "format due to lossy compression.");
+    img->m_effects.m_gates |= EffectStegnographyEncode;
+
+    if (ImGui::Button("Ok")) {
+        *is_open = false;
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Cancel")) {
+        img->m_effects.m_gates &= ~EffectStegnographyEncode;
+        *is_open = false;
+    }
+
+    ImGui::End();
+}
+
+void app::showStegnographyDecodeWindow(Image *img) {
+    bool *is_open = &img->m_effects.m_windows_open[EffectIdxStegnographyDecode];
+
+    if (!*is_open) {
+        return;
+    }
+
+    if ((!ImGui::Begin("Decode Message", is_open))) {
+        ImGui::End();
+        return;
+    }
+
+    ImGui::TextWrapped("Decoded Message\n---------------\n\n%s",
+                       img->m_stegnography_decode_buf.c_str());
+
+    if (ImGui::Button("Ok")) {
+        *is_open = false;
+    }
+
+    ImGui::End();
+}

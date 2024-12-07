@@ -1,6 +1,7 @@
 #include "include/image.hpp"
 #include "include/effect.hpp"
 #include "include/path.hpp"
+#include "include/math.hpp"
 
 #include "g_engine/include/framebuffer.hpp"
 #include "g_engine/include/shader.hpp"
@@ -138,6 +139,11 @@ void app::Image::init(const std::string &path, int preferred_height) {
     m_effects.init();
     m_loaded = true;
 
+    memset(m_stegnography_encode_buf, '\0', sizeof(m_stegnography_encode_buf));
+
+    bool decode_char = true;
+    unsigned char encoded_char = 0;
+
     for (size_t i = 0;
         i < m_data.m_size.x * m_data.m_size.y * m_data.m_channels;
         i += m_data.m_channels) {
@@ -148,6 +154,35 @@ void app::Image::init(const std::string &path, int preferred_height) {
         m_min_intensity.x = std::min(m_min_intensity.x, m_data.m_pixels[i + 0]);
         m_min_intensity.y = std::min(m_min_intensity.y, m_data.m_pixels[i + 1]);
         m_min_intensity.z = std::min(m_min_intensity.z, m_data.m_pixels[i + 2]);
+
+        if (i == 0) {
+            encoded_char =
+                ( m_data.m_pixels[i + 0] & (unsigned char)3) |
+                ((m_data.m_pixels[i + 1] & (unsigned char)3) << 2) |
+                ((m_data.m_pixels[i + 2] & (unsigned char)3) << 4);
+
+            if (mathStegnoDecodeChar(encoded_char) != '\0') {
+                m_stegnography_decode_buf = "|NO MESSAGE IS ENCODED|";
+                decode_char = false;
+            } else {
+                continue;
+            }
+        }
+
+        if (!decode_char) {
+            continue;
+        }
+
+        encoded_char =
+            ( m_data.m_pixels[i + 0] & (unsigned char)3) |
+            ((m_data.m_pixels[i + 1] & (unsigned char)3) << 2) |
+            ((m_data.m_pixels[i + 2] & (unsigned char)3) << 4);
+
+        if (mathStegnoDecodeChar(encoded_char) == '\0') {
+            decode_char = false;
+        }
+
+        m_stegnography_decode_buf.push_back(mathStegnoDecodeChar(encoded_char));
     }
 }
 
@@ -157,6 +192,8 @@ void app::Image::deinit() {
     m_vertex_buffer.deinit();
     m_framebuffer.deinit();
     m_loaded = false;
+    m_stegnography_decode_buf.erase();
+    memset(m_stegnography_encode_buf, '\0', sizeof(m_stegnography_encode_buf));
 }
 
 void app::Image::passEffectDataGpu(GLuint shader) {
@@ -252,8 +289,9 @@ void app::Image::show(ImVec2 window_padding) {
 void app::Image::applyEffects() {
     g_engine::vec4<unsigned char> crnt_px;
 
-    for (size_t y = 0; y < m_data.m_size.y; y++) {
-        for (size_t x = 0; x < m_data.m_size.x; x++) {
+    size_t x = 0, y = 0;
+    for (y = 0; y < m_data.m_size.y; y++) {
+        for (x = 0; x < m_data.m_size.x; x++) {
             crnt_px = getPixel(m_data, {x, y});
 
             if ((m_effects.m_gates & 3) == app::EffectGrayscaleAverage) {
@@ -282,6 +320,32 @@ void app::Image::applyEffects() {
             }
             if (m_effects.m_gates & app::EffectContrast) {
                 app::effectContrastFn(&crnt_px, m_min_intensity, m_max_intensity);
+            }
+            if (m_effects.m_gates & app::EffectStegnographyEncode) {
+                if (x == 0 && y == 0) {
+                    crnt_px.x &= ~(unsigned char)3;
+                    crnt_px.y &= ~(unsigned char)3;
+                    crnt_px.z &= ~(unsigned char)3;
+
+                    crnt_px.x |= ( 63 &  (unsigned char)3);
+                    crnt_px.y |= ((63 & ((unsigned char)3 << 2)) >> 2);
+                    crnt_px.z |= ((63 & ((unsigned char)3 << 4)) >> 4);
+                }
+                else {
+                    unsigned char stegno_char =
+                        mathStegnoEncodeChar(m_stegnography_encode_buf[y * m_data.m_size.x + x - 1]);
+                    crnt_px.x &= ~(unsigned char)3;
+                    crnt_px.y &= ~(unsigned char)3;
+                    crnt_px.z &= ~(unsigned char)3;
+
+                    crnt_px.x |= ( stegno_char &  (unsigned char)3);
+                    crnt_px.y |= ((stegno_char & ((unsigned char)3 << 2)) >> 2);
+                    crnt_px.z |= ((stegno_char & ((unsigned char)3 << 4)) >> 4);
+
+                    if (stegno_char == 63) {
+                        m_effects.m_gates &= ~app::EffectStegnographyEncode;
+                    }
+                }
             }
 
             setPixel(&m_data, {x, y}, crnt_px);

@@ -40,14 +40,16 @@ void app::renderMainMenu(FolderContentDialog *file_dialog, Image *img,
         ImGui::MenuItem("Blur", NULL, false, img->m_loaded);
         ImGui::MenuItem("Sharpen", NULL, false, img->m_loaded);
         ImGui::Separator();
-        ImGui::MenuItem("Noise", NULL, false, img->m_loaded);
+        ImGui::MenuItem("Noise", NULL, &img->m_effects.m_windows_open[EffectIdxNoise], img->m_loaded);
 
         ImGui::EndMenu();
     }
 
     if (ImGui::BeginMenu("| Crypto")) {
-        ImGui::MenuItem("Encode Message (Steganography)", NULL, false, img->m_loaded);
-        ImGui::MenuItem("Decode Message (Steganography)", NULL, false, img->m_loaded);
+        ImGui::MenuItem("Encode Message (Steganography)", NULL,
+                        &img->m_effects.m_windows_open[EffectIdxStegnographyEncode], img->m_loaded);
+        ImGui::MenuItem("Decode Message (Steganography)", NULL,
+                        &img->m_effects.m_windows_open[EffectIdxStegnographyDecode], img->m_loaded);
 
         ImGui::EndMenu();
     }
@@ -69,5 +71,8 @@ void app::renderMainMenu(FolderContentDialog *file_dialog, Image *img,
         } else {
             img->m_effects.m_gates &= ~EffectContrast;
         }
+        showNoiseWindow(img, shader, proj_mat, view_mat);
+        showStegnographyEncodeWindow(img);
+        showStegnographyDecodeWindow(img);
     }
 }
