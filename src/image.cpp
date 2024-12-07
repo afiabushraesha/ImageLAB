@@ -2,6 +2,7 @@
 #include "include/effect.hpp"
 #include "include/path.hpp"
 #include "include/math.hpp"
+#include "include/quantize_color.hpp"
 
 #include "g_engine/include/framebuffer.hpp"
 #include "g_engine/include/shader.hpp"
@@ -14,6 +15,7 @@
 
 #include <climits>
 #include <cstring>
+#include <iostream>
 
 static g_engine::vec4<unsigned char> getPixel(const app::ImageData &data,
                                               const g_engine::vec2<size_t> &coord) {
@@ -210,11 +212,16 @@ void app::Image::passEffectDataGpu(GLuint shader) {
     glUniform1f(glGetUniformLocation(shader, "contrast_intensity"),
                 m_effects.m_prop.m_contrast_intensity);
     glUniform1ui(glGetUniformLocation(shader, "threshold_limit"),
-                m_effects.m_prop.m_threshold_limit);
+                 m_effects.m_prop.m_threshold_limit);
     glUniform3ui(glGetUniformLocation(shader, "max_intensity"),
-                m_max_intensity.x, m_max_intensity.y, m_max_intensity.z);
+                 m_max_intensity.x, m_max_intensity.y, m_max_intensity.z);
     glUniform3ui(glGetUniformLocation(shader, "min_intensity"),
-                m_min_intensity.x, m_min_intensity.y, m_min_intensity.z);
+                 m_min_intensity.x, m_min_intensity.y, m_min_intensity.z);
+    glUniform1uiv(glGetUniformLocation(shader, "quantize_colors"),
+                  app::quantize_colors[m_effects.m_prop.m_quantize_palette_idx].size(),
+                  &app::quantize_colors[m_effects.m_prop.m_quantize_palette_idx][0]);
+    glUniform1i(glGetUniformLocation(shader, "quantize_colors_size"),
+                app::quantize_colors[m_effects.m_prop.m_quantize_palette_idx].size());
 }
 
 void app::Image::renderToViewport(GLuint shader, glm::mat4 *proj_mat, const glm::mat4 &view_mat) {
@@ -289,6 +296,7 @@ void app::Image::show(ImVec2 window_padding) {
 void app::Image::applyEffects() {
     g_engine::vec4<unsigned char> crnt_px;
 
+    std::cout << m_effects.m_prop.m_quantize_palette_idx << std::endl;
     size_t x = 0, y = 0;
     for (y = 0; y < m_data.m_size.y; y++) {
         for (x = 0; x < m_data.m_size.x; x++) {
@@ -324,6 +332,10 @@ void app::Image::applyEffects() {
             if (m_effects.m_gates & app::EffectNoise) {
                 app::effectNoiseFn(&crnt_px, {(int)x, (int)y},
                                    m_data.m_size, m_effects.m_prop.m_noise_intensity);
+            }
+            if (m_effects.m_gates & app::EffectQuantize) {
+                app::effectQuantizeFn(&crnt_px,
+                                      app::quantize_colors[m_effects.m_prop.m_quantize_palette_idx]);
             }
             if (m_effects.m_gates & app::EffectStegnographyEncode) {
                 if (x == 0 && y == 0) {

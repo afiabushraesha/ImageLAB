@@ -4,6 +4,7 @@
 #include "../g_engine/include/types.hpp"
 
 #include <cstddef>
+#include <vector>
 
 namespace app {
     const size_t EffectCount = 11;
@@ -51,6 +52,7 @@ namespace app {
         float m_contrast_intensity = 1.0f;
         bool m_is_inverted = false;
         int m_threshold_limit = 127;
+        int m_quantize_palette_idx = 0;
     };
 
     struct Effects {
@@ -73,7 +75,8 @@ namespace app {
                           g_engine::vec3<unsigned char> min_intensity,
                           g_engine::vec3<unsigned char> max_intensity);
 
-    void effectQuantizeFn(g_engine::vec4<unsigned char> *px);
+    void effectQuantizeFn(g_engine::vec4<unsigned char> *px,
+                          const std::vector<unsigned int> &color_set);
     void effectNoiseFn(g_engine::vec4<unsigned char> *px, g_engine::vec2<int> px_coords,
                        g_engine::vec2<int> image_size, float intensity);
     void effectChangeDetectFn(g_engine::vec4<unsigned char> *px);

@@ -3,6 +3,8 @@
 
 #include <cstring>
 #include <algorithm>
+#include <climits>
+#include <iostream>
 
 void app::Effects::init() {
     memset(m_windows_open, false, sizeof(m_windows_open));
@@ -57,11 +59,26 @@ void app::effectContrastFn(g_engine::vec4<unsigned char> *px,
     px->y = ((float)(px->y - min_intensity.y) / (float)(max_intensity.y - min_intensity.y)) * 255;
     px->z = ((float)(px->z - min_intensity.z) / (float)(max_intensity.z - min_intensity.z)) * 255;
 }
-//
-//void app::effectQuantizeFn(g_engine::vec4<unsigned char> px) {
-//
-//}
-//
+
+void app::effectQuantizeFn(g_engine::vec4<unsigned char> *px,
+                           const std::vector<unsigned int> &color_set) {
+    g_engine::vec3<unsigned char> crnt_color;
+    unsigned int crnt_dis;
+    unsigned int closest_dis = UINT_MAX;
+
+    for (int i = 0; i < color_set.size(); i++) {
+        crnt_color = mathRgbFromHex(color_set[i]);
+        crnt_dis = mathEuclidianDistance((g_engine::vec3<unsigned char>){px->x, px->y, px->z},
+                                         crnt_color);
+        if (crnt_dis < closest_dis) {
+            closest_dis = crnt_dis;
+            px->x = crnt_color.x;
+            px->y = crnt_color.y;
+            px->z = crnt_color.z;
+        }
+    }
+}
+
 void app::effectNoiseFn(g_engine::vec4<unsigned char> *px, g_engine::vec2<int> px_coords,
                         g_engine::vec2<int> image_size, float intensity) {
     float noise_value = mathRandom({
@@ -84,8 +101,6 @@ void app::effectNoiseFn(g_engine::vec4<unsigned char> *px, g_engine::vec2<int> p
             (float)px->z + intensity * (noise_value - 0.5f) * 0.1f * 255.0f,
             0.0f, 255.0f
         );
-
-
 }
 //
 //void app::effectChangeDetectFn(g_engine::vec4<unsigned char> px) {

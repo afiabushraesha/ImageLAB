@@ -52,3 +52,19 @@ float app::mathRandom(g_engine::vec2<float> seed) {
         ) * 43758.5453123
     );
 }
+
+unsigned int app::mathEuclidianDistance(g_engine::vec3<unsigned char> a,
+                                        g_engine::vec3<unsigned char> b) {
+    return
+        (a.x - b.x) * (a.x - b.x) +
+        (a.y - b.y) * (a.y - b.y) +
+        (a.z - b.z) * (a.z - b.z);
+}
+
+g_engine::vec3<unsigned char> app::mathRgbFromHex(unsigned int hex) {
+    return {
+        (unsigned char)((hex >> 24) & 0xFF),
+        (unsigned char)((hex >> 16) & 0xFF),
+        (unsigned char)((hex >> 8) & 0xFF)
+    };
+}

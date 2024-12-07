@@ -26,9 +26,25 @@ uniform float contrast_intensity;
 uniform uint threshold_limit;
 uniform uvec3 max_intensity;
 uniform uvec3 min_intensity;
+uniform uint quantize_colors[64];
+uniform int quantize_colors_size;
+
+vec3 vec3FromUint(uint a) {
+    return vec3(
+        ((a >> 24u) & 0xFFu) / 255.0f,
+        ((a >> 16u) & 0xFFu) / 255.0f,
+        ((a >> 8u) & 0xFFu) / 255.0f
+    );
+}
 
 float imgRandom(vec2 st) {
     return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+}
+
+float euclidianDistance(vec3 a, vec3 b) {
+    return (a.x - b.x) * (a.x - b.x) +
+        (a.y - b.y) * (a.y - b.y) +
+        (a.z - b.z) * (a.z - b.z);
 }
 
 vec4 imgGrayscaleAverage(vec4 px) {
@@ -80,6 +96,25 @@ vec4 imgNoise(vec4 px) {
     return vec4(_px, px.a);
 }
 
+vec4 imgQuantize(vec4 px) {
+    vec3 nearest_color = px.rgb;
+    vec3 crnt_color;
+
+    float lowest_dis = 5.0f;
+    float crnt_dis;
+
+    for (int i = 0; i < quantize_colors_size; i++) {
+        crnt_color = vec3FromUint(quantize_colors[i]);
+        crnt_dis = euclidianDistance(px.rgb, crnt_color);
+        if (crnt_dis < lowest_dis) {
+            nearest_color = crnt_color;
+            lowest_dis = crnt_dis;
+        }
+    }
+
+    return vec4(nearest_color, px.a);
+}
+
 void main() {
     vec4 pixel_color = texture(image_texture, v_texture_coords);
 
@@ -108,6 +143,9 @@ void main() {
     }
     if ((effect_gates & EffectNoise) == EffectNoise) {
         pixel_color = imgNoise(pixel_color);
+    }
+    if ((effect_gates & EffectQuantize) == EffectQuantize) {
+        pixel_color = imgQuantize(pixel_color);
     }
 
     out_color = pixel_color;

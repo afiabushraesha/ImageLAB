@@ -254,3 +254,40 @@ void app::showStegnographyDecodeWindow(Image *img) {
 
     ImGui::End();
 }
+
+void app::showQuantizeWindow(Image *img, unsigned int shader,
+                             glm::mat4 *proj_mat, const glm::mat4 &view_mat) {
+    bool *is_open = &img->m_effects.m_windows_open[EffectIdxQuantize];
+
+    if (!*is_open) {
+        return;
+    }
+
+    if ((!ImGui::Begin("Quantize", is_open))) {
+        ImGui::End();
+        return;
+    }
+
+    img->m_effects.m_gates |= EffectQuantize;
+
+    ImGui::TextWrapped("Quantifies/Truncates the colors of an image");
+    if (ImGui::Combo("Color Set", &img->m_effects.m_prop.m_quantize_palette_idx,
+                     "Gruvbox Material Dark\0Catpuccin Mocha\0Nord\0Everforest Dark\0"
+                     "Tomorrow Night\0")) {
+        img->passEffectDataGpu(shader);
+        img->renderToViewport(shader, proj_mat, view_mat);
+    }
+
+    if (ImGui::Button("Ok")) {
+        *is_open = false;
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Cancel")) {
+        img->m_effects.m_gates &= ~EffectQuantize;
+        *is_open = false;
+    }
+
+    ImGui::End();
+}
