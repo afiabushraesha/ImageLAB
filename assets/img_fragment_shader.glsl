@@ -23,63 +23,129 @@ uniform vec3 tint_color;
 uniform float brightness_multiple;
 uniform float noise_intensity;
 uniform float contrast_intensity;
-uniform int threshold_limit;
+uniform uint threshold_limit;
+uniform uvec3 max_intensity;
+uniform uvec3 min_intensity;
+uniform uint quantize_colors[64];
+uniform int quantize_colors_size;
 
-vec4 grayscaleAverage(vec4 px) {
+vec3 vec3FromUint(uint a) {
+    return vec3(
+        ((a >> 24u) & 0xFFu) / 255.0f,
+        ((a >> 16u) & 0xFFu) / 255.0f,
+        ((a >> 8u) & 0xFFu) / 255.0f
+    );
+}
+
+float imgRandom(vec2 st) {
+    return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+}
+
+float euclidianDistance(vec3 a, vec3 b) {
+    return (a.x - b.x) * (a.x - b.x) +
+        (a.y - b.y) * (a.y - b.y) +
+        (a.z - b.z) * (a.z - b.z);
+}
+
+vec4 imgGrayscaleAverage(vec4 px) {
     float y = (px.r + px.g + px.b) / 3.0f;
     return vec4(y, y, y, px.a);
 }
 
-vec4 grayscaleLumin(vec4 px) {
+vec4 imgGrayscaleLumin(vec4 px) {
     float y = (0.299f * px.r) + (0.587f * px.g) + (0.114f * px.b);
     return vec4(y, y, y, px.a);
 }
 
-vec4 grayscaleLightness(vec4 px) {
+vec4 imgGrayscaleLightness(vec4 px) {
     float y = (min(px.r, min(px.g, px.b)) + max(px.r, max(px.g, px.b))) / 2.0f;
     return vec4(y, y, y, px.a);
 }
 
-vec4 brightness(vec4 px, float multiple) {
+vec4 imgBrightness(vec4 px, float multiple) {
     return vec4(px.rgb * vec3(multiple), px.a);
 }
 
-vec4 tint(vec4 px, vec3 color) {
+vec4 imgTint(vec4 px, vec3 color) {
     return vec4(px.rgb * color, px.a);
 }
 
-vec4 invert(vec4 px) {
+vec4 imgInvert(vec4 px) {
     return vec4(vec3(1.0f) - px.rgb, px.a);
 }
 
-vec4 threshold(vec4 px, float limit) {
-    vec4 _px = grayscaleLumin(px);
-    if (_px.r > limit) return vec4(1.0f);
+vec4 imgThreshold(vec4 px, float limit) {
+    vec4 _px = imgGrayscaleLumin(px);
+    if (_px.r >= limit) return vec4(1.0f);
     else return vec4(vec3(0.0f), 1.0f);
+}
+
+vec4 imgContrast(vec4 px) {
+    return vec4(
+        ((px.r * 255) - min_intensity.r) / (max_intensity.r - min_intensity.r),
+        ((px.g * 255) - min_intensity.g) / (max_intensity.g - min_intensity.g),
+        ((px.b * 255) - min_intensity.b) / (max_intensity.b - min_intensity.b),
+        px.a
+    );
+}
+
+vec4 imgNoise(vec4 px) {
+    vec3 _px = px.rgb;
+    float noise_value = imgRandom(v_texture_coords) * 10.0f;
+    _px.rgb += noise_intensity * (noise_value - 0.5) * 0.1f;
+    return vec4(_px, px.a);
+}
+
+vec4 imgQuantize(vec4 px) {
+    vec3 nearest_color = px.rgb;
+    vec3 crnt_color;
+
+    float lowest_dis = 5.0f;
+    float crnt_dis;
+
+    for (int i = 0; i < quantize_colors_size; i++) {
+        crnt_color = vec3FromUint(quantize_colors[i]);
+        crnt_dis = euclidianDistance(px.rgb, crnt_color);
+        if (crnt_dis < lowest_dis) {
+            nearest_color = crnt_color;
+            lowest_dis = crnt_dis;
+        }
+    }
+
+    return vec4(nearest_color, px.a);
 }
 
 void main() {
     vec4 pixel_color = texture(image_texture, v_texture_coords);
 
     if ((effect_gates & 3u) == EffectGrayscaleAverage) {
-        pixel_color = grayscaleAverage(pixel_color);
+        pixel_color = imgGrayscaleAverage(pixel_color);
     } else if ((effect_gates & 3u) == EffectGrayscaleLumin) {
-        pixel_color = grayscaleLumin(pixel_color);
+        pixel_color = imgGrayscaleLumin(pixel_color);
     } else if ((effect_gates & 3u) == EffectGrayscaleLight) {
-        pixel_color = grayscaleLightness(pixel_color);
+        pixel_color = imgGrayscaleLightness(pixel_color);
     }
 
     if ((effect_gates & EffectBrightness) == EffectBrightness) {
-        pixel_color = brightness(pixel_color, brightness_multiple);
+        pixel_color = imgBrightness(pixel_color, brightness_multiple);
     }
     if ((effect_gates & EffectTint) == EffectTint) {
-        pixel_color = tint(pixel_color, tint_color);
+        pixel_color = imgTint(pixel_color, tint_color);
     }
     if ((effect_gates & EffectInvert) == EffectInvert) {
-        pixel_color = invert(pixel_color);
+        pixel_color = imgInvert(pixel_color);
     }
     if ((effect_gates & EffectThreshold) == EffectThreshold) {
-        pixel_color = threshold(pixel_color, threshold_limit / 255.0f);
+        pixel_color = imgThreshold(pixel_color, threshold_limit / 255.0f);
+    }
+    if ((effect_gates & EffectContrast) == EffectContrast) {
+        pixel_color = imgContrast(pixel_color);
+    }
+    if ((effect_gates & EffectNoise) == EffectNoise) {
+        pixel_color = imgNoise(pixel_color);
+    }
+    if ((effect_gates & EffectQuantize) == EffectQuantize) {
+        pixel_color = imgQuantize(pixel_color);
     }
 
     out_color = pixel_color;

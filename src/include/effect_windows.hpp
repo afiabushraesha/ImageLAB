@@ -9,9 +9,14 @@ namespace app {
                               glm::mat4 *proj_mat, const glm::mat4 &view_mat);
     void showTintWindow(Image *img, unsigned int shader,
                         glm::mat4 *proj_mat, const glm::mat4 &view_mat);
-    void showInvertWindow(Image *img);
     void showThresholdWindow(Image *img, unsigned int shader,
                              glm::mat4 *proj_mat, const glm::mat4 &view_mat);
+    void showNoiseWindow(Image *img, unsigned int shader,
+                         glm::mat4 *proj_mat, const glm::mat4 &view_mat);
+    void showStegnographyEncodeWindow(Image *img);
+    void showStegnographyDecodeWindow(Image *img);
+    void showQuantizeWindow(Image *img, unsigned int shader,
+                            glm::mat4 *proj_mat, const glm::mat4 &view_mat);
 }
 
 #endif

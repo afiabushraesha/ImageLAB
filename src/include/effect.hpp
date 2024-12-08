@@ -4,10 +4,10 @@
 #include "../g_engine/include/types.hpp"
 
 #include <cstddef>
+#include <vector>
 
 namespace app {
     const size_t EffectCount = 11;
-    const size_t EffectIdxCount = EffectCount - 2;
 
     enum EffectType : unsigned int {
         EffectGrayscaleAverage = 1,
@@ -21,6 +21,7 @@ namespace app {
         EffectChangeDetect = 1 << 7,
         EffectInvert = 1 << 8,
         EffectThreshold = 1 << 9,
+        EffectStegnographyEncode = 1 << 30,
     };
 
     enum EffectWindowIdx {
@@ -33,6 +34,9 @@ namespace app {
         EffectIdxChangeDetect,
         EffectIdxInvert,
         EffectIdxThreshold,
+        EffectIdxStegnographyEncode,
+        EffectIdxStegnographyDecode,
+        EffectIdxCount,
     };
 
     // TODO: No need for this struct.
@@ -47,7 +51,8 @@ namespace app {
         float m_noise_intensity = 0.5f;
         float m_contrast_intensity = 1.0f;
         bool m_is_inverted = false;
-        unsigned char m_threshold_limit = 127;
+        int m_threshold_limit = 127;
+        int m_quantize_palette_idx = 0;
     };
 
     struct Effects {
@@ -57,7 +62,27 @@ namespace app {
         bool m_windows_open[EffectIdxCount];
 
         void init();
+        void reset();
     };
+
+    void effectGrayscaleAverageFn(g_engine::vec4<unsigned char> *px);
+    void effectGrayscaleLuminFn(g_engine::vec4<unsigned char> *px);
+    void effectGrayscaleLightFn(g_engine::vec4<unsigned char> *px);
+
+    void effectBrightnessFn(g_engine::vec4<unsigned char> *px, float multiple);
+    void effectTintFn(g_engine::vec4<unsigned char> *px, g_engine::vec3<float> color);
+    void effectContrastFn(g_engine::vec4<unsigned char> *px,
+                          g_engine::vec3<unsigned char> min_intensity,
+                          g_engine::vec3<unsigned char> max_intensity);
+
+    void effectQuantizeFn(g_engine::vec4<unsigned char> *px,
+                          const std::vector<unsigned int> &color_set);
+    void effectNoiseFn(g_engine::vec4<unsigned char> *px, g_engine::vec2<int> px_coords,
+                       g_engine::vec2<int> image_size, float intensity);
+    void effectChangeDetectFn(g_engine::vec4<unsigned char> *px);
+
+    void effectInvertFn(g_engine::vec4<unsigned char> *px);
+    void effectThresholdFn(g_engine::vec4<unsigned char> *px, unsigned int threshold);
 }
 
 #endif

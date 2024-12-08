@@ -1,7 +1,7 @@
 #ifndef _APP_STATE_H_
 #define _APP_STATE_H_
 
-#include "file_dialog.hpp"
+#include "dialog.hpp"
 #include "image.hpp"
 
 #include "../g_engine/include/window.hpp"
@@ -14,7 +14,7 @@ namespace app {
         
         std::string home_path;
         ListBoxState listbox_state;
-        FileDialog img_file_dialog;
+        FolderContentDialog img_file_dialog;
 
         Image img;
         glm::mat4 img_proj_mat;

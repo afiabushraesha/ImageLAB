@@ -1,23 +1,16 @@
 #include "include/state.hpp"
-#include "include/file_dialog.hpp"
+#include "include/dialog.hpp"
 #include "include/image.hpp"
 #include "include/main_menu.hpp"
+#include "include/config.hpp"
+#include "include/path.hpp"
 
 #include "g_engine/include/shader.hpp"
 
 #include "../vendor/include/imgui/imgui.h"
 #include "../vendor/include/imgui/imgui_impl_glfw.h"
 #include "../vendor/include/imgui/imgui_impl_opengl3.h"
-
-// TODO: Implement new colorscheme, should be part of src/theme.cpp
-static ImVec4 hexToNormalizedRgb(unsigned int hex) {
-    return ImVec4(
-        ((hex      ) & 0xff) / 255.0f,
-        ((hex >> 8 ) & 0xff) / 255.0f,
-        ((hex >> 16) & 0xff) / 255.0f,
-        ((hex >> 24) & 0xff) / 255.0f
-    );
-}
+#include "../vendor/include/SOIL2/SOIL2.h"
 
 void app::State::init(g_engine::vec2<int> initial_size, const char *title,
                       g_engine::vec4<float> color) {
@@ -28,50 +21,7 @@ void app::State::init(g_engine::vec2<int> initial_size, const char *title,
     ImGui_ImplGlfw_InitForOpenGL(window.m_window, true);
     ImGui_ImplOpenGL3_Init();
 
-    ImGuiIO &imgui_io = ImGui::GetIO();
-    imgui_io.Fonts->AddFontFromFileTTF("assets/roboto_mono_medium.ttf", 20.0f);
-
-    ImGuiStyle &imgui_style = ImGui::GetStyle();
-
-    // TODO: Implement new colorscheme, should be part of src/theme.cpp
-    imgui_style.WindowRounding = 0;
-    imgui_style.FrameRounding = 0;
-    imgui_style.ScrollbarRounding = 0;
-
-    //imgui_style.Colors[ImGuiCol_Text]                  = ImVec4();
-    //imgui_style.Colors[ImGuiCol_TextDisabled]          = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
-    //imgui_style.Colors[ImGuiCol_WindowBg]              = ImVec4(0.09f, 0.09f, 0.15f, 1.00f);
-    //imgui_style.Colors[ImGuiCol_PopupBg]               = ImVec4(0.05f, 0.05f, 0.10f, 0.85f);
-    //imgui_style.Colors[ImGuiCol_Border]                = ImVec4(0.70f, 0.70f, 0.70f, 0.65f);
-    //imgui_style.Colors[ImGuiCol_BorderShadow]          = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    //imgui_style.Colors[ImGuiCol_FrameBg]               = ImVec4(0.00f, 0.00f, 0.01f, 1.00f);
-    //imgui_style.Colors[ImGuiCol_FrameBgHovered]        = ImVec4(0.90f, 0.80f, 0.80f, 0.40f);
-    //imgui_style.Colors[ImGuiCol_FrameBgActive]         = ImVec4(0.90f, 0.65f, 0.65f, 0.45f);
-    //imgui_style.Colors[ImGuiCol_TitleBg]               = ImVec4(0.00f, 0.00f, 0.00f, 0.83f);
-    //imgui_style.Colors[ImGuiCol_TitleBgCollapsed]      = ImVec4(0.40f, 0.40f, 0.80f, 0.20f);
-    //imgui_style.Colors[ImGuiCol_TitleBgActive]         = ImVec4(0.00f, 0.00f, 0.00f, 0.87f);
-    //imgui_style.Colors[ImGuiCol_MenuBarBg]             = ImVec4(0.01f, 0.01f, 0.02f, 0.80f);
-    //imgui_style.Colors[ImGuiCol_ScrollbarBg]           = ImVec4(0.20f, 0.25f, 0.30f, 0.60f);
-    //imgui_style.Colors[ImGuiCol_ScrollbarGrab]         = ImVec4(0.55f, 0.53f, 0.55f, 0.51f);
-    //imgui_style.Colors[ImGuiCol_ScrollbarGrabHovered]  = ImVec4(0.56f, 0.56f, 0.56f, 1.00f);
-    //imgui_style.Colors[ImGuiCol_ScrollbarGrabActive]   = ImVec4(0.56f, 0.56f, 0.56f, 0.91f);
-    //imgui_style.Colors[ImGuiCol_CheckMark]             = ImVec4(0.90f, 0.90f, 0.90f, 0.83f);
-    //imgui_style.Colors[ImGuiCol_SliderGrab]            = ImVec4(0.70f, 0.70f, 0.70f, 0.62f);
-    //imgui_style.Colors[ImGuiCol_SliderGrabActive]      = ImVec4(0.30f, 0.30f, 0.30f, 0.84f);
-    //imgui_style.Colors[ImGuiCol_Button]                = ImVec4(0.48f, 0.72f, 0.89f, 0.49f);
-    //imgui_style.Colors[ImGuiCol_ButtonHovered]         = ImVec4(0.50f, 0.69f, 0.99f, 0.68f);
-    //imgui_style.Colors[ImGuiCol_ButtonActive]          = ImVec4(0.80f, 0.50f, 0.50f, 1.00f);
-    //imgui_style.Colors[ImGuiCol_Header]                = ImVec4(0.30f, 0.69f, 1.00f, 0.53f);
-    //imgui_style.Colors[ImGuiCol_HeaderHovered]         = ImVec4(0.44f, 0.61f, 0.86f, 1.00f);
-    //imgui_style.Colors[ImGuiCol_HeaderActive]          = ImVec4(0.38f, 0.62f, 0.83f, 1.00f);
-    //imgui_style.Colors[ImGuiCol_ResizeGrip]            = ImVec4(1.00f, 1.00f, 1.00f, 0.85f);
-    //imgui_style.Colors[ImGuiCol_ResizeGripHovered]     = ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
-    //imgui_style.Colors[ImGuiCol_ResizeGripActive]      = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
-    //imgui_style.Colors[ImGuiCol_PlotLines]             = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-    //imgui_style.Colors[ImGuiCol_PlotLinesHovered]      = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-    //imgui_style.Colors[ImGuiCol_PlotHistogram]         = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-    //imgui_style.Colors[ImGuiCol_PlotHistogramHovered]  = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
-    //imgui_style.Colors[ImGuiCol_TextSelectedBg]        = ImVec4(0.00f, 0.00f, 1.00f, 0.35f);
+    configInit();
     
     #ifdef _WIN32
         home_path = std::getenv("USERPROFILE"); 
@@ -83,6 +33,8 @@ void app::State::init(g_engine::vec2<int> initial_size, const char *title,
                                  "assets/img_vertex_shader.glsl", 
                                  "assets/img_fragment_shader.glsl");
     view_mat = glm::translate(glm::mat4(1.0f), {0.0f, 0.0f, -1.0f});
+
+    img.m_effects.init();
 }
 
 void app::State::run() {
@@ -92,6 +44,36 @@ void app::State::run() {
 
     const ImGuiStyle &imgui_style = ImGui::GetStyle();
     window.beginFrame(window_color);
+
+    ImGui::ShowDemoWindow();
+
+    if (img.m_loaded && !img_file_dialog.m_path.empty()) {
+        pathAppend(&img_file_dialog.m_path, img.m_name);
+        unsigned int save_type = imageGetSaveType(img_file_dialog.m_path);
+
+        if (save_type == UINT_MAX) {
+            img_file_dialog.m_path.append(".png");
+            save_type = SOIL_SAVE_TYPE_PNG;
+        }
+
+        ImGui::Begin("Saving");
+        ImGui::TextWrapped("Your image is being saved at: `%s`",
+                           img_file_dialog.m_path.c_str());
+        ImGui::End();
+
+        img.applyEffects();
+
+        SOIL_save_image(img_file_dialog.m_path.c_str(), save_type,
+                        img.m_data.m_size.x, img.m_data.m_size.y,
+                        img.m_data.m_channels, img.m_data.m_pixels);
+
+        img.m_effects.reset();
+        img.m_effects.init();
+
+        img.deinit();
+        img_file_dialog.m_path.erase();
+        img_file_dialog.m_crnt_dir.erase();
+    }
 
     if (img.m_loaded && img.m_effects.m_old_gates != img.m_effects.m_gates) {
         img.passEffectDataGpu(img_shader);
@@ -103,21 +85,27 @@ void app::State::run() {
         img.show(imgui_style.WindowPadding);
     }
 
-    if (img_file_dialog.show_window) {
-        img_file_dialog.show(&listbox_state, home_path,
-                             "Select an image. The image type must be "
-                             "*.jpg, *.jpeg, *.png, *.bmp or *.tga.");
-    } else if (!img_file_dialog.file_path.empty()) {
-        if (app::checkIfPathImage(img_file_dialog.file_path)) {
-            img.init(img_file_dialog.file_path.c_str(), 480);
+    if (img_file_dialog.m_show_window && !img.m_loaded) {
+        dialogRenderImageImport(&img_file_dialog, &listbox_state, home_path,
+                                "Select an image. The image type must be "
+                                "*.jpg, *.jpeg, *.png, *.bmp or *.tga.");
+    } else if (!img_file_dialog.m_path.empty()) {
+        if (app::checkIfPathImage(img_file_dialog.m_path)) {
+            img.init(img_file_dialog.m_path, 480);
         }
         if (img.m_loaded) {
             img.renderToViewport(img_shader, &img_proj_mat, view_mat);
         }
 
-        img_file_dialog.file_path.erase();
-        img_file_dialog.crnt_dir.erase();
+        img_file_dialog.m_path.erase();
+        img_file_dialog.m_crnt_dir.erase();
         listbox_state.reset();
+    }
+
+    if (img_file_dialog.m_show_window && img.m_loaded) {
+        dialogRenderImageExport(&img_file_dialog, &listbox_state, img.m_name, img.m_name_size, home_path,
+                                "Select a folder to save the image. You can change the name of"
+                                "of the file in `File Name`");
     }
 
     app::renderMainMenu(&img_file_dialog, &img, img_shader,
