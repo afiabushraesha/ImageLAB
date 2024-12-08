@@ -19,29 +19,19 @@ void app::renderMainMenu(FolderContentDialog *file_dialog, Image *img,
         ImGui::EndMenu();
     }
 
-    if (ImGui::BeginMenu("| Filters")) {
-        ImGui::MenuItem("Grayscale", NULL, &img->m_effects.m_windows_open[EffectIdxGrayscale], img->m_loaded);
-        ImGui::MenuItem("Invert", NULL, &img->m_effects.m_windows_open[EffectIdxInvert], img->m_loaded);
-        ImGui::MenuItem("Threshold", NULL, &img->m_effects.m_windows_open[EffectIdxThreshold], img->m_loaded);
-        ImGui::MenuItem("Noise", NULL, &img->m_effects.m_windows_open[EffectIdxNoise], img->m_loaded);
-        ImGui::Separator();
-        ImGui::MenuItem("Tint", NULL, &img->m_effects.m_windows_open[EffectIdxTint], img->m_loaded);
-        ImGui::MenuItem("Contrast", NULL, &img->m_effects.m_windows_open[EffectIdxContrast], img->m_loaded);
-        ImGui::MenuItem("Brighten", NULL, &img->m_effects.m_windows_open[EffectIdxBrightness], img->m_loaded);
-        ImGui::Separator();
-        ImGui::MenuItem("Quantize", NULL, &img->m_effects.m_windows_open[EffectIdxBrightness], img->m_loaded);
+    ImGui::MenuItem("| Grayscale", NULL, &img->m_effects.m_windows_open[EffectIdxGrayscale], img->m_loaded);
+    ImGui::MenuItem("| Invert", NULL, &img->m_effects.m_windows_open[EffectIdxInvert], img->m_loaded);
+    ImGui::MenuItem("| Threshold", NULL, &img->m_effects.m_windows_open[EffectIdxThreshold], img->m_loaded);
+    ImGui::MenuItem("| Noise", NULL, &img->m_effects.m_windows_open[EffectIdxNoise], img->m_loaded);
+    ImGui::MenuItem("| Tint", NULL, &img->m_effects.m_windows_open[EffectIdxTint], img->m_loaded);
+    ImGui::MenuItem("| Contrast", NULL, &img->m_effects.m_windows_open[EffectIdxContrast], img->m_loaded);
+    ImGui::MenuItem("| Brighten", NULL, &img->m_effects.m_windows_open[EffectIdxBrightness], img->m_loaded);
+    ImGui::MenuItem("| Quantize", NULL, &img->m_effects.m_windows_open[EffectIdxBrightness], img->m_loaded);
 
-        ImGui::EndMenu();
-    }
-
-    if (ImGui::BeginMenu("| Crypto")) {
-        ImGui::MenuItem("Encode Message (Steganography)", NULL,
-                        &img->m_effects.m_windows_open[EffectIdxStegnographyEncode], img->m_loaded);
-        ImGui::MenuItem("Decode Message (Steganography)", NULL,
-                        &img->m_effects.m_windows_open[EffectIdxStegnographyDecode], img->m_loaded);
-
-        ImGui::EndMenu();
-    }
+    ImGui::MenuItem("| Encode", NULL,
+                    &img->m_effects.m_windows_open[EffectIdxStegnographyEncode], img->m_loaded);
+    ImGui::MenuItem("| Decode", NULL,
+                    &img->m_effects.m_windows_open[EffectIdxStegnographyDecode], img->m_loaded);
 
     ImGui::EndMainMenuBar();
 
