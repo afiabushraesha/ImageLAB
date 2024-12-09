@@ -296,7 +296,6 @@ void app::Image::show(ImVec2 window_padding) {
 void app::Image::applyEffects() {
     g_engine::vec4<unsigned char> crnt_px;
 
-    std::cout << m_effects.m_prop.m_quantize_palette_idx << std::endl;
     size_t x = 0, y = 0;
     for (y = 0; y < m_data.m_size.y; y++) {
         for (x = 0; x < m_data.m_size.x; x++) {
