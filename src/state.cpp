@@ -45,8 +45,6 @@ void app::State::run() {
     const ImGuiStyle &imgui_style = ImGui::GetStyle();
     window.beginFrame(window_color);
 
-    ImGui::ShowDemoWindow();
-
     if (img.m_loaded && !img_file_dialog.m_path.empty()) {
         pathAppend(&img_file_dialog.m_path, img.m_name);
         unsigned int save_type = imageGetSaveType(img_file_dialog.m_path);

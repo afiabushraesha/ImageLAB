@@ -26,7 +26,7 @@ void app::renderMainMenu(FolderContentDialog *file_dialog, Image *img,
     ImGui::MenuItem("| Tint", NULL, &img->m_effects.m_windows_open[EffectIdxTint], img->m_loaded);
     ImGui::MenuItem("| Contrast", NULL, &img->m_effects.m_windows_open[EffectIdxContrast], img->m_loaded);
     ImGui::MenuItem("| Brighten", NULL, &img->m_effects.m_windows_open[EffectIdxBrightness], img->m_loaded);
-    ImGui::MenuItem("| Quantize", NULL, &img->m_effects.m_windows_open[EffectIdxBrightness], img->m_loaded);
+    ImGui::MenuItem("| Quantize", NULL, &img->m_effects.m_windows_open[EffectIdxQuantize], img->m_loaded);
 
     ImGui::MenuItem("| Encode", NULL,
                     &img->m_effects.m_windows_open[EffectIdxStegnographyEncode], img->m_loaded);

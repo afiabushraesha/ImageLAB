@@ -63,13 +63,13 @@ void app::effectContrastFn(g_engine::vec4<unsigned char> *px,
 void app::effectQuantizeFn(g_engine::vec4<unsigned char> *px,
                            const std::vector<unsigned int> &color_set) {
     g_engine::vec3<unsigned char> crnt_color;
+    g_engine::vec3<unsigned char> original_color = {px->x, px->y, px->z};
     unsigned int crnt_dis;
     unsigned int closest_dis = UINT_MAX;
 
     for (int i = 0; i < color_set.size(); i++) {
         crnt_color = mathRgbFromHex(color_set[i]);
-        crnt_dis = mathEuclidianDistance((g_engine::vec3<unsigned char>){px->x, px->y, px->z},
-                                         crnt_color);
+        crnt_dis = mathEuclidianDistance(original_color, crnt_color);
         if (crnt_dis < closest_dis) {
             closest_dis = crnt_dis;
             px->x = crnt_color.x;
