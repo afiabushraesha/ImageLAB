@@ -11,15 +11,11 @@ Currently the following features are noted in the roadmap for ImageLAB.
 - [x] Invert
 - [x] Threshold
 - [x] Contrast
-- [ ] Crop
-- [ ] Filters on Crop
-- [ ] Edge Detection (Sobel)
-- [ ] Blur (Gaussian)
-- [ ] Color Quantization
-- [ ] Noise (Hurl)
-- [ ] Steganography
-- [ ] Change Detection
-- [ ] Sharpening
+- [x] Color Quantization
+- [x] Noise 
+- [x] Steganography
+
+
 
 ## Building
 Currenly, the `build.py` script only works for Windows & Linux.
